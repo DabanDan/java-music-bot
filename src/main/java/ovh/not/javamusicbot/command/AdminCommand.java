@@ -1,6 +1,5 @@
 package ovh.not.javamusicbot.command;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
@@ -24,15 +23,15 @@ public class AdminCommand extends Command {
     private final Map<String, Command> subCommands = new HashMap<>();
     private final String subCommandsString;
 
-    public AdminCommand(AudioPlayerManager playerManager) {
+    public AdminCommand() {
         super("admin", "a");
         hide = true;
         CommandManager.register(subCommands,
                 new EvalCommand(),
                 new ShutdownCommand(),
                 new ShardRestartCommand(),
-                new EncodeCommand(playerManager),
-                new DecodeCommand(playerManager),
+                new EncodeCommand(),
+                new DecodeCommand(),
                 new ReloadCommand()
         );
         StringBuilder builder = new StringBuilder("Subcommands:");
@@ -132,22 +131,20 @@ public class AdminCommand extends Command {
     }
 
     private class EncodeCommand extends Command {
-        private final AudioPlayerManager playerManager;
-
-        private EncodeCommand(AudioPlayerManager playerManager) {
+        private EncodeCommand() {
             super("encode");
-            this.playerManager = playerManager;
         }
 
         @Override
         public void on(Context context) {
-            GuildMusicManager musicManager = GuildMusicManager.get(context.getEvent().getGuild());
-            if (musicManager == null || !musicManager.isOpen() || musicManager.getPlayer().getPlayingTrack() == null) {
-                context.reply("Not playing music!");
+            MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+            if (!musicManager.isPlayingMusic()) {
+                context.reply("a track must be playing to encode it");
                 return;
             }
+
             try {
-                context.reply(Utils.encode(playerManager, musicManager.getPlayer().getPlayingTrack()));
+                context.reply(Utils.encode(musicManager.getPlayer().getPlayingTrack()));
             } catch (IOException e) {
                 logger.error("error performing encode command", e);
                 context.reply("An error occurred!");
@@ -156,38 +153,38 @@ public class AdminCommand extends Command {
     }
 
     private class DecodeCommand extends Command {
-        private final AudioPlayerManager playerManager;
-
-        private DecodeCommand(AudioPlayerManager playerManager) {
+        private DecodeCommand() {
             super("decode");
-            this.playerManager = playerManager;
         }
 
         @Override
         public void on(Context context) {
-            GuildMusicManager musicManager = GuildMusicManager.getOrCreate(context.getEvent().getGuild(),
-                    context.getEvent().getTextChannel(), playerManager);
             if (context.getArgs().length == 0) {
                 context.reply("Usage: {{prefix}}a decode <base64 string>");
                 return;
             }
+            String base64 = context.getArgs()[0];
+
             VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
             if (channel == null) {
                 context.reply("Must be in a voice channel!");
                 return;
             }
-            String base64 = context.getArgs()[0];
+
             AudioTrack track;
             try {
-                track = Utils.decode(playerManager, base64);
+                track = Utils.decode(base64);
             } catch (IOException e) {
                 logger.error("error performing decode command", e);
                 context.reply("An error occurred!");
                 return;
             }
+
+            MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
             if (!musicManager.isOpen()) {
-                musicManager.open(channel, context.getEvent().getAuthor());
+                musicManager.open(channel);
             }
+
             musicManager.getPlayer().playTrack(track);
         }
     }

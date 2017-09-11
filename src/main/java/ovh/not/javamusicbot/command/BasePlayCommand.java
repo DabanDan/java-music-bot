@@ -5,7 +5,7 @@ import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandManager;
-import ovh.not.javamusicbot.GuildMusicManager;
+import ovh.not.javamusicbot.MusicManager;
 import ovh.not.javamusicbot.LoadResultHandler;
 
 import java.util.Set;
@@ -35,7 +35,7 @@ abstract class BasePlayCommand extends Command {
             return;
         }
       
-        GuildMusicManager musicManager = GuildMusicManager.getOrCreate(context.getEvent().getGuild(),
+        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
                 context.getEvent().getTextChannel(), playerManager);
         if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
                 && musicManager.getChannel() != channel

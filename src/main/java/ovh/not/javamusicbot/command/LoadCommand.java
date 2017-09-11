@@ -11,7 +11,7 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.GuildMusicManager;
+import ovh.not.javamusicbot.MusicManager;
 import ovh.not.javamusicbot.MusicBot;
 import ovh.not.javamusicbot.Utils;
 
@@ -41,7 +41,7 @@ public class LoadCommand extends Command {
             return;
         }
 
-        GuildMusicManager musicManager = GuildMusicManager.getOrCreate(context.getEvent().getGuild(),
+        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
                 context.getEvent().getTextChannel(), playerManager);
         if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
                 && musicManager.getChannel() != channel

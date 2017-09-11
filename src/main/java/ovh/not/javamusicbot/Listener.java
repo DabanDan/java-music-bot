@@ -1,5 +1,6 @@
 package ovh.not.javamusicbot;
 
+import lavalink.client.io.Lavalink;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,31 +31,46 @@ class Listener extends ListenerAdapter {
     private static final String DBOTS_ORG_STATS_URL = "https://discordbots.org/api/bots/%s/stats";
 
     private final Pattern commandPattern = Pattern.compile(MusicBot.getConfigs().config.regex);
-    private final CommandManager commandManager;
+
+    private Optional<CommandManager> commandManager = Optional.empty();
+    private Optional<Lavalink> lavalink = Optional.empty();
 
     Listener() {
-        commandManager = new CommandManager();
     }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        if (!lavalink.isPresent()) {
+            logger.info("received message before lavalink ready");
+            return;
+        }
+
+        if (this.commandManager == null) {
+            this.commandManager = Optional.of(new CommandManager(lavalink.get()));
+        }
+        CommandManager commandManager = this.commandManager.get();
+
         User author = event.getAuthor();
         if (author.isBot() || author.getId().equalsIgnoreCase(event.getJDA().getSelfUser().getId())) {
             return;
         }
+
         String content = event.getMessage().getContent();
         Matcher matcher = commandPattern.matcher(content.replace("\r", " ").replace("\n", " "));
         if (!matcher.find()) {
             return;
         }
+
         if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_WRITE)) {
             return;
         }
+
         String name = matcher.group(1).toLowerCase();
         Command command = commandManager.getCommand(name);
         if (command == null) {
             return;
         }
+
         Command.Context context = command.new Context();
         context.setEvent(event);
         if (matcher.groupCount() > 1) {
@@ -63,6 +80,7 @@ class Listener extends ListenerAdapter {
             }
             context.setArgs(matches);
         }
+
         command.on(context);
     }
 
@@ -168,12 +186,22 @@ class Listener extends ListenerAdapter {
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
-        if (GuildMusicManager.getGUILDS().containsKey(event.getGuild())) {
-            GuildMusicManager musicManager = GuildMusicManager.getGUILDS().remove(event.getGuild());
+        Guild guild = event.getGuild();
+
+        // get the guild's music manager
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(guild);
+
+        if (musicManager != null) {
+            // clear the song queue, stop the current track
+            musicManager.getTrackScheduler().getQueue().clear();
             musicManager.getPlayer().stopTrack();
-            musicManager.getScheduler().getQueue().clear();
+
+            // close the voice connection
             musicManager.close();
         }
-        event.getGuild().getAudioManager().closeAudioConnection();
+    }
+
+    void setLavalink(Lavalink lavalink) {
+        this.lavalink = Optional.of(lavalink);
     }
 }

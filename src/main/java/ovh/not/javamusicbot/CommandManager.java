@@ -10,6 +10,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import lavalink.client.io.Lavalink;
 import net.dv8tion.jda.core.entities.Member;
 import ovh.not.javamusicbot.command.*;
 
@@ -20,34 +21,24 @@ public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
     private final Map<Member, Selection<AudioTrack, String>> selectors = new HashMap<>();
 
-    CommandManager() {
-        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-
-        playerManager.registerSourceManager(new YoutubeAudioSourceManager());
-        playerManager.registerSourceManager(new SoundCloudAudioSourceManager());
-        playerManager.registerSourceManager(new BandcampAudioSourceManager());
-        playerManager.registerSourceManager(new VimeoAudioSourceManager());
-        playerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
-        playerManager.registerSourceManager(new BeamAudioSourceManager());
-        playerManager.registerSourceManager(new HttpAudioSourceManager());
-
+    CommandManager(Lavalink lavalink) {
         CommandManager.register(commands,
                 new AboutCommand(),
-                new AdminCommand(playerManager),
+                new AdminCommand(),
                 new ChooseCommand(this),
-                new DiscordFMCommand(this, playerManager),
-                new DumpCommand(playerManager),
+                new DiscordFMCommand(this),
+                new DumpCommand(),
                 new HelpCommand(this),
                 new InviteCommand(),
                 new JumpCommand(),
-                new LoadCommand(playerManager),
+                new LoadCommand(),
                 new LoopCommand(),
                 new MoveCommand(),
                 new NowPlayingCommand(),
                 new PauseCommand(),
-                new PlayCommand(this, playerManager),
+                new PlayCommand(this),
                 new QueueCommand(),
-                new RadioCommand(this, playerManager),
+                new RadioCommand(this),
                 new RemoveCommand(),
                 new ReorderCommand(),
                 new RepeatCommand(),
@@ -55,7 +46,7 @@ public class CommandManager {
                 new SearchCommand(this),
                 new ShuffleCommand(),
                 new SkipCommand(),
-                new SoundCloudCommand(this, playerManager),
+                new SoundCloudCommand(this),
                 new StopCommand(),
                 new VolumeCommand()
         );

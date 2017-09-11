@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.GuildMusicManager;
+import ovh.not.javamusicbot.MusicManager;
 import ovh.not.javamusicbot.MusicBot;
 import ovh.not.javamusicbot.Pageable;
 
@@ -42,7 +42,7 @@ public class QueueCommand extends Command {
 
     @Override
     public void on(Context context) {
-        GuildMusicManager musicManager = GuildMusicManager.get(context.getEvent().getGuild());
+        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
         if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
             context.reply("No music is queued or playing on this guild! Add some using `{{prefix}}play <song name/link>`");
             return;

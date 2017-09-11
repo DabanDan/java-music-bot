@@ -14,7 +14,7 @@ public class LoadResultHandler implements AudioLoadResultHandler {
     private static final Logger logger = LoggerFactory.getLogger(LoadResultHandler.class);
 
     private final CommandManager commandManager;
-    private final GuildMusicManager musicManager;
+    private final MusicManager musicManager;
     private final AudioPlayerManager playerManager;
     private final Command.Context context;
   
@@ -23,7 +23,7 @@ public class LoadResultHandler implements AudioLoadResultHandler {
     private boolean allowSearch;
     private boolean setFirstInQueue;
 
-    public LoadResultHandler(CommandManager commandManager, GuildMusicManager musicManager, AudioPlayerManager playerManager, Command.Context context) {
+    public LoadResultHandler(CommandManager commandManager, MusicManager musicManager, AudioPlayerManager playerManager, Command.Context context) {
         this.commandManager = commandManager;
         this.musicManager = musicManager;
         this.playerManager = playerManager;

@@ -78,7 +78,7 @@ public class RadioCommand extends Command {
             context.reply("You must be in a voice channel!");
             return;
         }
-        GuildMusicManager musicManager = GuildMusicManager.getOrCreate(context.getEvent().getGuild(),
+        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
                 context.getEvent().getTextChannel(), playerManager);
         if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
                 && musicManager.getChannel() != channel

@@ -74,6 +74,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- lavalink client -->
+        <dependency>
+            <groupId>com.github.Frederikam.Lavalink</groupId>
+            <artifactId>Lavalink-Client</artifactId>
+            <version>fa4f9d8332</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

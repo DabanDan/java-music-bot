@@ -1,6 +1,7 @@
 package ovh.not.javamusicbot;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -19,6 +20,8 @@ public abstract class Utils {
     private static final String DURATION_FORMAT = "mm:ss";
     private static final String DURATION_FORMAT_LONG = "HH:mm:ss";
 
+    private static AudioPlayerManager playerManager = null; // singleton for #encode and #decode
+
     public static String formatDuration(long duration) {
         return DurationFormatUtils.formatDuration(duration, DURATION_FORMAT);
     }
@@ -35,18 +38,26 @@ public abstract class Utils {
         return user.openPrivateChannel().complete();
     }
 
-    public static String encode(AudioPlayerManager playerManager, AudioTrack track) throws IOException {
+    private static AudioPlayerManager getAudioPlayerManager() {
+        if (playerManager == null) {
+            playerManager = new DefaultAudioPlayerManager();
+        }
+
+        return playerManager;
+    }
+
+    public static String encode(AudioTrack track) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        playerManager.encodeTrack(new MessageOutput(stream), track);
+        getAudioPlayerManager().encodeTrack(new MessageOutput(stream), track);
         byte[] encoded = Base64.getEncoder().encode(stream.toByteArray());
         return new String(encoded);
     }
 
-    public static AudioTrack decode(AudioPlayerManager playerManager, String encoded) throws IOException {
+    public static AudioTrack decode(String encoded) throws IOException {
         byte[] bytes = Base64.getDecoder().decode(encoded.getBytes());
         ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
         DecodedTrackHolder holder;
-        return playerManager.decodeTrack(new MessageInput(stream)).decodedTrack;
+        return getAudioPlayerManager().decodeTrack(new MessageInput(stream)).decodedTrack;
     }
 
     public static boolean stringArrayContains(String[] array, String element) {

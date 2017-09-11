@@ -2,6 +2,8 @@ package ovh.not.javamusicbot;
 
 import com.google.gson.Gson;
 import com.moandjiezana.toml.Toml;
+import lavalink.client.io.Lavalink;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.bot.sharding.ShardManagerBuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
@@ -13,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 public final class MusicBot {
     private static final Logger logger = LoggerFactory.getLogger(MusicBot.class);
@@ -49,10 +54,11 @@ public final class MusicBot {
     public static void main(String[] args) {
         Config config = getConfigs().config;
 
+        Listener listener = new Listener();
+
         ShardManagerBuilder builder = new ShardManagerBuilder()
-                .addEventListener(new Listener())
+                .addEventListener(listener)
                 .setToken(config.token)
-                .setAudioEnabled(true)
                 .setGame(Game.of(config.game));
 
         if (args.length < 3) {
@@ -72,10 +78,25 @@ public final class MusicBot {
 
         // todo set reconnect ipc queue (when alpaca adds support for it)
 
+        ShardManager manager;
         try {
-            builder.buildBlocking();
+            manager = builder.buildBlocking();
         } catch (LoginException | InterruptedException | RateLimitedException e) {
             logger.error("error on call to ShardManager#buildBlocking", e);
+            return;
+        }
+
+        Lavalink lavalink = new Lavalink(config.lavalinkUserId, manager.getShardsTotal(), manager::getShard);
+        listener.setLavalink(lavalink);
+        GuildManager.getInstance().setLavalink(lavalink);
+
+        for (Map.Entry<String, String> entry : config.lavalinkNodes.entrySet()) {
+            try {
+                lavalink.addNode(new URI(entry.getKey()), entry.getValue());
+            } catch (URISyntaxException e) {
+                logger.error("error parsing lavalink node server uri", e);
+                return;
+            }
         }
 
         while (running) try {
