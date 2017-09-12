@@ -10,8 +10,8 @@ dabBot! Support is also provided for self hosting it & there is a very comprehen
 Please use [JMusicBot](https://github.com/jagrosh/MusicBot) instead of this repository.
 
 ## Why the fuck did you put it on GitHub then?
-Because I like version control, open sourcing my code as it builds my portfolio, makes it easier for other developers 
-to contribute and hopefully helps people learn from my code.
+I like open sourcing my code because it builds my portfolio, makes it easier for other developers 
+to contribute and hopefully helps people learn from my code. Also GitHub is free version control.
 
 ## Note to previous self hosters
 Support has been 100% cut from this project. Hosting now requires lavalink sending nodes & other external dependencies.
