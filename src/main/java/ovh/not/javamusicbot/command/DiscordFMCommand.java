@@ -1,17 +1,13 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.utils.IOUtil;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.CommandManager;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.LoadResultHandler;
+import ovh.not.javamusicbot.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,14 +73,8 @@ public class DiscordFMCommand extends Command {
             return;
         }
 
-        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
-                context.getEvent().getTextChannel(), playerManager);
-        if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
-                && musicManager.getChannel() != channel
-                && !context.getEvent().getMember().hasPermission(musicManager.getChannel(), Permission.VOICE_MOVE_OTHERS)) {
-            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the `Move Members` permission can do this.", musicManager.getChannel().getName());
-            return;
-        }
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (Utils.warnIfBotInUse(musicManager, context)) return;
 
         String libraryName = String.join(" ", context.getArgs());
 
@@ -111,9 +101,9 @@ public class DiscordFMCommand extends Command {
             return;
         }
 
-        musicManager.getScheduler().getQueue().clear();
-        musicManager.getScheduler().setRepeat(false);
-        musicManager.getScheduler().setLoop(false);
+        musicManager.getTrackScheduler().getQueue().clear();
+        musicManager.getTrackScheduler().setRepeat(false);
+        musicManager.getTrackScheduler().setLoop(false);
         musicManager.getPlayer().stopTrack();
 
         LoadResultHandler handler = new LoadResultHandler(commandManager, musicManager, playerManager, context);
@@ -124,7 +114,7 @@ public class DiscordFMCommand extends Command {
         }
 
         if (!musicManager.isOpen()) {
-            musicManager.open(channel, context.getEvent().getAuthor());
+            musicManager.open(channel);
         }
     }
 

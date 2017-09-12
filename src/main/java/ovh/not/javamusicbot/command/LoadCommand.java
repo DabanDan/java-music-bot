@@ -1,8 +1,6 @@
 package ovh.not.javamusicbot.command;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -10,10 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.MusicBot;
-import ovh.not.javamusicbot.Utils;
+import ovh.not.javamusicbot.*;
 
 import java.io.IOException;
 
@@ -21,11 +16,8 @@ import java.io.IOException;
 public class LoadCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
 
-    private final AudioPlayerManager playerManager;
-
-    public LoadCommand(AudioPlayerManager playerManager) {
+    public LoadCommand() {
         super("load", "undump");
-        this.playerManager = playerManager;
     }
 
     @Override
@@ -41,14 +33,9 @@ public class LoadCommand extends Command {
             return;
         }
 
-        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
-                context.getEvent().getTextChannel(), playerManager);
-        if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
-                && musicManager.getChannel() != channel
-                && !context.getEvent().getMember().hasPermission(musicManager.getChannel(), Permission.VOICE_MOVE_OTHERS)) {
-            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the `Move Members` permission can do this.", musicManager.getChannel().getName());
-            return;
-        }
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+
+        if (Utils.warnIfBotInUse(musicManager, context)) return;
 
         String url = context.getArgs()[0];
         if (url.contains("hastebin.com") && !url.contains("raw")) {
@@ -67,17 +54,19 @@ public class LoadCommand extends Command {
             return;
         }
 
-        musicManager.getScheduler().getQueue().clear();
-        musicManager.getScheduler().setRepeat(false);
-        musicManager.getScheduler().setLoop(false);
+        TrackScheduler scheduler = musicManager.getTrackScheduler();
+        scheduler.getQueue().clear();
+        scheduler.setRepeat(false);
+        scheduler.setLoop(false);
+
         musicManager.getPlayer().stopTrack();
 
         for (int i = 0; i < tracks.length(); i++) {
             String encoded = tracks.getString(i);
 
             try {
-                AudioTrack track = Utils.decode(playerManager, encoded);
-                musicManager.getScheduler().queue(track);
+                AudioTrack track = Utils.decode(encoded);
+                scheduler.queue(musicManager.getPlayer(), track);
             } catch (IOException e) {
                 logger.error("error occurred decoding encoded tracks", e);
                 context.reply("An error occurred! %s", e.getMessage());
@@ -88,7 +77,7 @@ public class LoadCommand extends Command {
         context.reply("Loaded %d tracks from <%s>!", tracks.length(), url);
 
         if (!musicManager.isOpen()) {
-            musicManager.open(channel, context.getEvent().getAuthor());
+            musicManager.open(channel);
         }
     }
 }

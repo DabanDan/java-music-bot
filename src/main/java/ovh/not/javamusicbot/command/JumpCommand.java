@@ -1,6 +1,7 @@
 package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 import java.time.Duration;
@@ -16,17 +17,19 @@ public class JumpCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
         if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }
+
         if (context.getArgs().length == 0) {
             context.reply("Usage: `{{prefix}}jump <time>`\nExample: `{{prefix}}jump 03:51` - starts playing the current song "
                     + "at 3 min 51s instead of at the start.\nTime format: `hh:mm:ss`, e.g. 01:25:51 = 1 hour, "
                     + "25 minutes & 51 seconds");
             return;
         }
+
         Matcher matcher = TIME_PATTERN.matcher(context.getArgs()[0]);
         if (!matcher.find()) {
             context.reply("Usage: `{{prefix}}jump <time>`\nExample: `{{prefix}}jump 03:51` - starts playing the current song "
@@ -34,6 +37,7 @@ public class JumpCommand extends Command {
                     + "25 minutes & 51 seconds");
             return;
         }
+
         String sHours = matcher.group("hours");
         String sMinutes = matcher.group("minutes");
         if (sMinutes == null && sHours != null) {
@@ -41,6 +45,7 @@ public class JumpCommand extends Command {
             sHours = null;
         }
         String sSeconds = matcher.group("seconds");
+
         long hours = 0, minutes = 0, seconds = 0;
         try {
             if (sHours != null) {
@@ -58,10 +63,13 @@ public class JumpCommand extends Command {
                     + "25 minutes & 51 seconds");
             return;
         }
+
         long time = Duration.ofHours(hours).toMillis();
         time += Duration.ofMinutes(minutes).toMillis();
         time += Duration.ofSeconds(seconds).toMillis();
+
         musicManager.getPlayer().getPlayingTrack().setPosition(time);
+
         context.reply("Jumped to the specified position. Use `{{prefix}}nowplaying` to see the current song & position.");
     }
 }

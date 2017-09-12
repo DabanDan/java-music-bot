@@ -1,6 +1,5 @@
 package ovh.not.javamusicbot.command;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.bramhaag.owo.OwO;
 import okhttp3.*;
@@ -8,10 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.MusicBot;
-import ovh.not.javamusicbot.Utils;
+import ovh.not.javamusicbot.*;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -23,12 +19,10 @@ import static ovh.not.javamusicbot.Utils.encode;
 public class DumpCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(DumpCommand.class);
 
-    private final AudioPlayerManager playerManager;
     private final OwO owo;
 
-    public DumpCommand(AudioPlayerManager playerManager) {
+    public DumpCommand() {
         super("dump");
-        this.playerManager = playerManager;
         owo = new OwO.Builder()
                 .setKey(MusicBot.getConfigs().config.owoKey)
                 .setUploadUrl("https://paste.dabbot.org")
@@ -38,24 +32,27 @@ public class DumpCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }
-        String[] items = new String[musicManager.getScheduler().getQueue().size() + 1];
+
+        String[] items = new String[musicManager.getTrackScheduler().getQueue().size() + 1];
+
         AudioTrack current = musicManager.getPlayer().getPlayingTrack();
         try {
-            items[0] = Utils.encode(playerManager, current);
+            items[0] = Utils.encode(current);
         } catch (IOException e) {
             logger.error("error occurred encoding an AudioTrack", e);
             context.reply("An error occurred!");
             return;
         }
+
         int i = 1;
-        for (AudioTrack track : musicManager.getScheduler().getQueue()) {
+        for (AudioTrack track : musicManager.getTrackScheduler().getQueue()) {
             try {
-                items[i] = encode(playerManager, track);
+                items[i] = encode(track);
             } catch (IOException e) {
                 logger.error("error occured encoding audio tracks", e);
                 context.reply("An error occurred!");
@@ -63,7 +60,9 @@ public class DumpCommand extends Command {
             }
             i++;
         }
+
         String json = new JSONArray(items).toString();
+
         owo.upload(json, "text/plain").execute(file -> {
             context.reply("Dump created! " + file.getFullUrl());
         }, throwable -> {

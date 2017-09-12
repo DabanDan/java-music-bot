@@ -147,4 +147,8 @@ public abstract class Utils {
             return false;
         }
     }
+
+    public static boolean isInVoiceChannel(Member member) {
+        return member.getVoiceState().inVoiceChannel();
+    }
 }

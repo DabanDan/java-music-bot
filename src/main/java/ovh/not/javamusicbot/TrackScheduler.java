@@ -4,6 +4,8 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import lavalink.client.player.IPlayer;
+import lavalink.client.player.LavaplayerPlayerWrapper;
 import lavalink.client.player.event.AudioEventAdapterWrapped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +49,21 @@ public class TrackScheduler extends AudioEventAdapterWrapped {
     }
 
     @SuppressWarnings("unchecked")
-    public void queue(AudioPlayer player, AudioTrack track, boolean... first) {
-        if (!player.startTrack(track, true)) {
+    public void queue(IPlayer player, AudioTrack track, boolean... first) {
+        if (musicManager.isPlayingMusic()) {
+            // add to the queue if already playing music
             if (first != null && first.length > 0 && first[0]) {
                 ((List<AudioTrack>) queue).add(0, track);
             } else {
                 queue.offer(track);
             }
+        } else {
+            // play the track now
+            player.playTrack(track);
         }
     }
 
-    public void next(AudioPlayer player, AudioTrack last) {
+    public void next(IPlayer player, AudioTrack last) {
         AudioTrack track;
         if (repeat && last != null) {
             track = last.makeClone();
@@ -67,15 +73,18 @@ public class TrackScheduler extends AudioEventAdapterWrapped {
             }
             track = queue.poll();
         }
-        if (!player.startTrack(track, false)) {
+
+        if (track == null) {
             musicManager.close();
+        } else {
+            player.playTrack(track);
         }
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
-            next(player, track);
+            next(new LavaplayerPlayerWrapper(player), track);
         }
     }
 

@@ -92,7 +92,7 @@ public final class MusicBot {
 
         for (Map.Entry<String, String> entry : config.lavalinkNodes.entrySet()) {
             try {
-                lavalink.addNode(new URI(entry.getKey()), entry.getValue());
+                lavalink.addNode(new URI(entry.getKey().substring(1, entry.getKey().length() - 1)), entry.getValue());
             } catch (URISyntaxException e) {
                 logger.error("error parsing lavalink node server uri", e);
                 return;

@@ -1,9 +1,6 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.MusicBot;
-import ovh.not.javamusicbot.Utils;
+import ovh.not.javamusicbot.*;
 
 public class VolumeCommand extends Command {
     public VolumeCommand() {
@@ -18,8 +15,8 @@ public class VolumeCommand extends Command {
             return;
         }
 
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }

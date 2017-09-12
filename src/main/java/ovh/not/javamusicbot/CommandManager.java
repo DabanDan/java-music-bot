@@ -2,15 +2,8 @@ package ovh.not.javamusicbot;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import lavalink.client.io.Lavalink;
 import net.dv8tion.jda.core.entities.Member;
 import ovh.not.javamusicbot.command.*;
 
@@ -22,11 +15,15 @@ public class CommandManager {
     private final Map<Member, Selection<AudioTrack, String>> selectors = new HashMap<>();
 
     CommandManager() {
+        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+
+        AudioSourceManagers.registerRemoteSources(playerManager);
+
         CommandManager.register(commands,
                 new AboutCommand(),
                 new AdminCommand(),
                 new ChooseCommand(this),
-                new DiscordFMCommand(this),
+                new DiscordFMCommand(this, playerManager),
                 new DumpCommand(),
                 new HelpCommand(),
                 new InviteCommand(),
@@ -36,9 +33,9 @@ public class CommandManager {
                 new MoveCommand(),
                 new NowPlayingCommand(),
                 new PauseCommand(),
-                new PlayCommand(this),
+                new PlayCommand(this, playerManager),
                 new QueueCommand(),
-                new RadioCommand(this),
+                new RadioCommand(this, playerManager),
                 new RemoveCommand(),
                 new ReorderCommand(),
                 new RepeatCommand(),
@@ -46,7 +43,7 @@ public class CommandManager {
                 new SearchCommand(this),
                 new ShuffleCommand(),
                 new SkipCommand(),
-                new SoundCloudCommand(this),
+                new SoundCloudCommand(this, playerManager),
                 new StopCommand(),
                 new VolumeCommand()
         );

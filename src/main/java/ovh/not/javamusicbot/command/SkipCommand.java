@@ -1,6 +1,7 @@
 package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 public class SkipCommand extends Command {
@@ -10,11 +11,12 @@ public class SkipCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }
-        musicManager.getScheduler().next(musicManager.getPlayer().getPlayingTrack());
+
+        musicManager.getTrackScheduler().next(musicManager.getPlayer(), musicManager.getPlayer().getPlayingTrack());
     }
 }

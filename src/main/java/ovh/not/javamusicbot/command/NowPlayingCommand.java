@@ -2,6 +2,7 @@ package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 import static ovh.not.javamusicbot.Utils.formatDuration;
@@ -16,12 +17,14 @@ public class NowPlayingCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }
+
         AudioTrack currentTrack = musicManager.getPlayer().getPlayingTrack();
+
         context.reply(NOW_PLAYING_FORMAT, currentTrack.getInfo().title, currentTrack.getInfo().author,
                 formatDuration(currentTrack.getPosition()), formatTrackDuration(currentTrack),
                 currentTrack.getInfo().uri);

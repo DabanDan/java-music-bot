@@ -1,6 +1,7 @@
 package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 import java.util.Collections;
@@ -13,12 +14,12 @@ public class ShuffleCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
             return;
         }
-        Collections.shuffle((List<?>) musicManager.getScheduler().getQueue());
+        Collections.shuffle((List<?>) musicManager.getTrackScheduler().getQueue());
         context.reply("Queue shuffled!");
     }
 }

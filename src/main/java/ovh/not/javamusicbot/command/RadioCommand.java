@@ -1,8 +1,9 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import ovh.not.javamusicbot.*;
 
 import java.util.Iterator;
@@ -39,6 +40,7 @@ public class RadioCommand extends Command {
 
     @Override
     public void on(Context context) {
+        // todo sort out this mess
         if (context.getArgs().length == 0) {
             if (usageMessage.length() < 2000) {
                 context.reply(usageMessage);
@@ -73,27 +75,32 @@ public class RadioCommand extends Command {
             context.reply("Invalid station! For usage & stations, use `{{prefix}}radio`");
             return;
         }
-        VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
-        if (channel == null) {
+
+        MessageReceivedEvent event = context.getEvent();
+        Member member = event.getMember();
+
+        if (!Utils.isInVoiceChannel(member)) {
             context.reply("You must be in a voice channel!");
             return;
         }
-        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
-                context.getEvent().getTextChannel(), playerManager);
-        if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
-                && musicManager.getChannel() != channel
-                && !context.getEvent().getMember().hasPermission(musicManager.getChannel(), Permission.VOICE_MOVE_OTHERS)) {
-            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the `Move Members` permission can do this.", musicManager.getChannel().getName());
-            return;
-        }
+
+        VoiceChannel channel = member.getVoiceState().getChannel();
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(event.getGuild());
+
+        if (Utils.warnIfBotInUse(musicManager, context)) return;
+
         LoadResultHandler handler = new LoadResultHandler(commandManager, musicManager, playerManager, context);
-        musicManager.getScheduler().getQueue().clear();
-        musicManager.getScheduler().setRepeat(false);
-        musicManager.getScheduler().setLoop(false);
+
+        TrackScheduler scheduler = musicManager.getTrackScheduler();
+        scheduler.getQueue().clear();
+        scheduler.setRepeat(false);
+        scheduler.setLoop(false);
+
         musicManager.getPlayer().stopTrack();
+
         playerManager.loadItem(url, handler);
         if (!musicManager.isOpen()) {
-            musicManager.open(channel, context.getEvent().getAuthor());
+            musicManager.open(channel);
         }
     }
 }

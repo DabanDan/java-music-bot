@@ -13,6 +13,8 @@ public class SearchCommand extends Command {
 
     @Override
     public void on(Context context) {
+        // todo change to {{prefix}}search [youtube/soundcloud...] <term> (and default to youtube)
+
         if (context.getArgs().length == 0) {
             context.reply("Usage: `{{prefix}}search <term>` - searches for a song on youtube\n" +
                     "To add the song as first in the queue, use `{{prefix}}search <term> -first`");

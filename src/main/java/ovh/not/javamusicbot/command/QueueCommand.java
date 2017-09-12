@@ -6,10 +6,7 @@ import okhttp3.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.MusicBot;
-import ovh.not.javamusicbot.Pageable;
+import ovh.not.javamusicbot.*;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -42,13 +39,15 @@ public class QueueCommand extends Command {
 
     @Override
     public void on(Context context) {
-        MusicManager musicManager = MusicManager.get(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        if (!musicManager.isPlayingMusic()) {
             context.reply("No music is queued or playing on this guild! Add some using `{{prefix}}play <song name/link>`");
             return;
         }
+
+        // todo clean up this big mess
         AudioTrack playing = musicManager.getPlayer().getPlayingTrack();
-        Queue<AudioTrack> queue = musicManager.getScheduler().getQueue();
+        Queue<AudioTrack> queue = musicManager.getTrackScheduler().getQueue();
         StringBuilder builder = new StringBuilder();
         if (context.getArgs().length > 0 && context.getArgs()[0].equalsIgnoreCase("all")) {
             long durationTotal = playing.getDuration();

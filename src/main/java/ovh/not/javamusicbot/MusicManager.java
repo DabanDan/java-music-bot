@@ -49,6 +49,14 @@ public class MusicManager {
                 .orElseGet(guild::getDefaultChannel);
     }
 
+    public boolean hasTextChannel() {
+        return textChannelId.isPresent();
+    }
+
+    public void setTextChannelIfNotPresent(TextChannel textChannel) {
+        if (!hasTextChannel()) textChannelId = Optional.of(textChannel.getId());
+    }
+
     public Optional<VoiceChannel> getVoiceChannel() {
         return voiceChannelId.map(guild::getVoiceChannelById);
     }
