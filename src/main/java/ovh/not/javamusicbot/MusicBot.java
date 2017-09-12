@@ -105,7 +105,8 @@ public final class MusicBot {
             e.printStackTrace();
         }
 
-        logger.info("goodbye :wave:");
+        logger.info("Shutting down lavalink");
+        lavalink.shutdown();
     }
 
     public static ConfigLoadResult getConfigs() {
