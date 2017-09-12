@@ -31,8 +31,8 @@ class Listener extends ListenerAdapter {
     private static final String DBOTS_ORG_STATS_URL = "https://discordbots.org/api/bots/%s/stats";
 
     private final Pattern commandPattern = Pattern.compile(MusicBot.getConfigs().config.regex);
+    private final CommandManager commandManager = new CommandManager();
 
-    private Optional<CommandManager> commandManager = Optional.empty();
     private Optional<Lavalink> lavalink = Optional.empty();
 
     Listener() {
@@ -44,11 +44,6 @@ class Listener extends ListenerAdapter {
             logger.info("received message before lavalink ready");
             return;
         }
-
-        if (this.commandManager == null) {
-            this.commandManager = Optional.of(new CommandManager(lavalink.get()));
-        }
-        CommandManager commandManager = this.commandManager.get();
 
         User author = event.getAuthor();
         if (author.isBot() || author.getId().equalsIgnoreCase(event.getJDA().getSelfUser().getId())) {

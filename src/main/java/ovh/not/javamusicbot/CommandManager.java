@@ -21,14 +21,14 @@ public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
     private final Map<Member, Selection<AudioTrack, String>> selectors = new HashMap<>();
 
-    CommandManager(Lavalink lavalink) {
+    CommandManager() {
         CommandManager.register(commands,
                 new AboutCommand(),
                 new AdminCommand(),
                 new ChooseCommand(this),
                 new DiscordFMCommand(this),
                 new DumpCommand(),
-                new HelpCommand(this),
+                new HelpCommand(),
                 new InviteCommand(),
                 new JumpCommand(),
                 new LoadCommand(),

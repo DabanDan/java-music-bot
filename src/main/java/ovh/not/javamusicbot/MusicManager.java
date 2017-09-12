@@ -20,7 +20,7 @@ public class MusicManager {
     private final TrackScheduler trackScheduler;
 
     private Optional<String> textChannelId = Optional.empty();
-    private boolean open = false;
+    private Optional<String> voiceChannelId = Optional.empty();
 
     MusicManager(Lavalink lavalink, Guild guild) {
         this.lavalink = lavalink;
@@ -49,8 +49,16 @@ public class MusicManager {
                 .orElseGet(guild::getDefaultChannel);
     }
 
+    public Optional<VoiceChannel> getVoiceChannel() {
+        return voiceChannelId.map(guild::getVoiceChannelById);
+    }
+
+    public boolean isVoiceChannelEmpty() {
+        return Utils.isVoiceChannelEmpty(getVoiceChannel());
+    }
+
     public boolean isOpen() {
-        return open;
+        return voiceChannelId.isPresent();
     }
 
     public void open(VoiceChannel voiceChannel) {
@@ -67,19 +75,19 @@ public class MusicManager {
         }
 
         lavalink.openVoiceConnection(voiceChannel);
-        open = true;
+        voiceChannelId = Optional.of(voiceChannel.getId());
 
         LOGGER.info("opened connection to voice channel {}", voiceChannel.getId());
     }
 
     public void close() {
         lavalink.closeVoiceConnection(guild);
-        open = false;
+        voiceChannelId = Optional.empty();
 
         LOGGER.info("closed voice connection for guild {}", guild.getId());
     }
 
     public boolean isPlayingMusic() {
-        return open && getPlayer().getPlayingTrack() != null;
+        return isOpen() && getPlayer().getPlayingTrack() != null;
     }
 }

@@ -2,11 +2,10 @@ package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.CommandManager;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.LoadResultHandler;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import ovh.not.javamusicbot.*;
 
 import java.util.Set;
 
@@ -34,14 +33,16 @@ abstract class BasePlayCommand extends Command {
             context.reply("You must be in a voice channel!");
             return;
         }
-      
-        MusicManager musicManager = MusicManager.getOrCreate(context.getEvent().getGuild(),
-                context.getEvent().getTextChannel(), playerManager);
-        if (musicManager.isOpen() && musicManager.getPlayer().getPlayingTrack() != null
-                && musicManager.getChannel() != channel
-                && !context.getEvent().getMember().hasPermission(musicManager.getChannel(), Permission.VOICE_MOVE_OTHERS)) {
 
-            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the `Move Members` permission can do this.", musicManager.getChannel().getName());
+        MessageReceivedEvent event = context.getEvent();
+        Guild guild = event.getGuild();
+
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(guild);
+
+        // if the bot is playing music and the voice channel is not empty
+        if (musicManager.isPlayingMusic() && !musicManager.isVoiceChannelEmpty() && event.getMember().hasPermission(Permission.VOICE_MOVE_OTHERS)) {
+            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the " +
+                    "`Move Members` permission can do this.", musicManager.getVoiceChannel().get().getName());
             return;
         }
 
@@ -58,7 +59,7 @@ abstract class BasePlayCommand extends Command {
 
         playerManager.loadItem(String.join(" ", context.getArgs()), handler);
         if (!musicManager.isOpen()) {
-            musicManager.open(channel, context.getEvent().getAuthor());
+            musicManager.open(channel);
         }
     }
 

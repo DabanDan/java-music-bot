@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Optional;
 
 public abstract class Utils {
     public static final String HASTEBIN_URL = "https://hastebin.com/documents";
@@ -114,5 +115,36 @@ public abstract class Utils {
         Role superSupporterRole = dabbotGuild.getRoleById(config.superSupporterRole);
 
         return allowedPatronAccess(guild, superSupporterRole);
+    }
+
+    public static String capitalise(String input) {
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+
+    // check if a voice channel is empty
+    // true if there are no none bot users or voiceChannel is not present
+    public static boolean isVoiceChannelEmpty(Optional<VoiceChannel> voiceChannel) {
+        return voiceChannel.map(vc -> vc.getMembers().stream()
+                .noneMatch(member -> member != member.getGuild().getSelfMember() && !member.getUser().isBot()))
+                .orElse(true);
+
+    }
+
+    // true if the bot is playing music and the voice channel is not empty and the member does not have the
+    // VOICE_MOVE_OTHERS permission
+    public static boolean isBotInUse(MusicManager musicManager, Member member) {
+        return musicManager.isPlayingMusic() && !musicManager.isVoiceChannelEmpty()
+                && !member.hasPermission(Permission.VOICE_MOVE_OTHERS);
+    }
+
+    // sends a reply to the context is the bot is in use in a voice channel
+    public static boolean warnIfBotInUse(MusicManager musicManager, Command.Context context) {
+        if (isBotInUse(musicManager, context.getEvent().getMember())) {
+            context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the " +
+                    "`Move Members` permission can do this.", musicManager.getVoiceChannel().get().getName());
+            return true;
+        } else {
+            return false;
+        }
     }
 }
