@@ -1,21 +1,20 @@
-package ovh.not.javamusicbot.command;
+package ovh.not.javamusicbot;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import ovh.not.javamusicbot.*;
 
 import java.util.List;
 import java.util.Set;
 
-abstract class BasePlayCommand extends AbstractCommand {
+public abstract class AbstractPlayCommand extends AbstractCommand {
     private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
-    boolean allowSearch = true;
-    boolean isSearch = false;
+    protected boolean allowSearch = true;
+    protected boolean isSearch = false;
 
-    BasePlayCommand(CommandManager commandManager, AudioPlayerManager playerManager, String name, String... names) {
+    protected AbstractPlayCommand(CommandManager commandManager, AudioPlayerManager playerManager, String name, String... names) {
         super(name, names);
         this.commandManager = commandManager;
         this.playerManager = playerManager;
