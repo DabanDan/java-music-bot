@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class Utils {
@@ -151,5 +152,14 @@ public abstract class Utils {
 
     public static boolean isInVoiceChannel(Member member) {
         return member.getVoiceState().inVoiceChannel();
+    }
+
+    public static Optional<VoiceChannel> getVoiceChannel(Guild guild, String name) {
+        List<VoiceChannel> channels = guild.getVoiceChannelsByName(name, true);
+        if (channels == null || channels.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(channels.get(0));
+        }
     }
 }

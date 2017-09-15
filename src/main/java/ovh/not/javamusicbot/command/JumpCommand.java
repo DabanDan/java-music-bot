@@ -1,42 +1,38 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
+import ovh.not.javamusicbot.command.base.AbstractTextResponseCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
 import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JumpCommand extends Command {
-    private static final Pattern TIME_PATTERN = Pattern.compile("(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})");
+public class JumpCommand extends AbstractTextResponseCommand {
+    private static final Pattern TIME_PATTERN = Pattern
+            .compile("(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})");
+
+    private static final String INVALID_ARGUMENTS_MESSAGE = "Usage: `{{prefix}}jump <time>`\nExample: " +
+            "`{{prefix}}jump 03:51` - starts playing the current song at 3 min 51s instead of at the start.\nTime " +
+            "format: `hh:mm:ss`, e.g. 01:25:51 = 1 hour, 25 minutes & 51 seconds";
 
     public JumpCommand() {
         super("jump", "seek");
+
+        // args :)
+        this.getPipeline().before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1));
+
+        // require music to be playing
+        this.getPipeline().before(PipelineHandlers.requiresMusicHandler());
     }
 
     @Override
-    public void on(CommandContext context) {
-        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-        if (musicManager == null || musicManager.getPlayer().getPlayingTrack() == null) {
-            context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
-            return;
-        }
-
-        if (context.getArgs().isEmpty()) {
-            context.reply("Usage: `{{prefix}}jump <time>`\nExample: `{{prefix}}jump 03:51` - starts playing the current song "
-                    + "at 3 min 51s instead of at the start.\nTime format: `hh:mm:ss`, e.g. 01:25:51 = 1 hour, "
-                    + "25 minutes & 51 seconds");
-            return;
-        }
-
+    public String textResponse(CommandContext context) {
         Matcher matcher = TIME_PATTERN.matcher(context.getArgs().get(0));
         if (!matcher.find()) {
-            context.reply("Usage: `{{prefix}}jump <time>`\nExample: `{{prefix}}jump 03:51` - starts playing the current song "
-                    + "at 3 min 51s instead of at the start.\nTime format: `hh:mm:ss`, e.g. 01:25:51 = 1 hour, "
-                    + "25 minutes & 51 seconds");
-            return;
+            return INVALID_ARGUMENTS_MESSAGE;
         }
 
         String sHours = matcher.group("hours");
@@ -59,18 +55,16 @@ public class JumpCommand extends Command {
                 seconds = Long.parseLong(sSeconds);
             }
         } catch (NumberFormatException e) {
-            context.reply("Usage: `{{prefix}}jump <time>`\nExample: `{{prefix}}jump 03:51` - starts playing the current song "
-                    + "at 3 min 51s instead of at the start.\nTime format: `hh:mm:ss`, e.g. 01:25:51 = 1 hour, "
-                    + "25 minutes & 51 seconds");
-            return;
+            return INVALID_ARGUMENTS_MESSAGE;
         }
 
         long time = Duration.ofHours(hours).toMillis();
         time += Duration.ofMinutes(minutes).toMillis();
         time += Duration.ofSeconds(seconds).toMillis();
 
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
         musicManager.getPlayer().getPlayingTrack().setPosition(time);
 
-        context.reply("Jumped to the specified position. Use `{{prefix}}nowplaying` to see the current song & position.");
+        return "Jumped to the specified position. Use `{{prefix}}nowplaying` to see the current song & position.";
     }
 }

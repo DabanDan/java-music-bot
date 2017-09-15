@@ -1,9 +1,11 @@
 package ovh.not.javamusicbot.command.base;
 
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
+import ovh.not.javamusicbot.Utils;
 
 import java.util.function.Function;
 
@@ -51,6 +53,21 @@ public class PipelineHandlers {
                 return false;
             }
             return true;
+        };
+    }
+
+    public static Function<CommandContext, Boolean> requiresNotInUseHandler() {
+        return context -> {
+            MessageReceivedEvent event = context.getEvent();
+            MusicManager musicManager = GuildManager.getInstance().getMusicManager(event.getGuild());
+
+            if (Utils.isBotInUse(musicManager, event.getMember())) {
+                context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the " +
+                        "`Move Members` permission can do this.", musicManager.getVoiceChannel().get().getName());
+                return false;
+            } else {
+                return true;
+            }
         };
     }
 }
