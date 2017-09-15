@@ -113,13 +113,13 @@ public class AdminCommand extends AbstractPipelineCommand {
         }
     }
 
-    private class ShardRestartCommand extends Command {
+    private class ShardRestartCommand extends AbstractTextResponseCommand {
         private ShardRestartCommand() {
             super("shardrestart", "sr");
         }
 
         @Override
-        public void on(CommandContext context) {
+        public String textResponse(CommandContext context) {
             MessageReceivedEvent event = context.getEvent();
             JDA jda = event.getJDA();
             ShardManager manager = jda.asBot().getShardManager();
@@ -133,19 +133,20 @@ public class AdminCommand extends AbstractPipelineCommand {
                     try {
                         shardId = Integer.parseInt(context.getArgs().get(0));
                         if (manager.getShard(shardId) == null) {
-                            context.reply("Invalid shard %d.", shardId);
-                            return;
+                            return String.format("Invalid shard %d.", shardId);
                         }
                     } catch (NumberFormatException e) {
-                        context.reply("Invalid input %s. Must be an integer.", context.getArgs().get(0));
-                        return;
+                        return String.format("Invalid input `%s`. Must be an integer.", context.getArgs().get(0));
                     }
                 }
 
                 context.reply("Restarting shard %d...", shardId);
                 manager.restart(shardId);
+
+                return String.format("Restarted shard %d!", shardId);
             } catch (Exception e) {
                 logger.error("error performing shardrestart command", e);
+                return String.format("Error running the shardrestart command: %s", e.getMessage());
             }
         }
     }
