@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public abstract class AbstractPipelineCommand extends Command {
     static final byte BEFORE_HANDLERS_SCOPE = 0x1;
-    private static final byte AFTER_HANDLERS_SCOPE = 0x2;
+    static final byte AFTER_HANDLERS_SCOPE = 0x2;
 
     private CommandPipeline pipeline = null;
     private byte handlersScope = BEFORE_HANDLERS_SCOPE | AFTER_HANDLERS_SCOPE;
