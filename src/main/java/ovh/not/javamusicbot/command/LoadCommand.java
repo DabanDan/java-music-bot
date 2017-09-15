@@ -9,34 +9,26 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.*;
+import ovh.not.javamusicbot.command.base.AbstractTextResponseCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
 import java.io.IOException;
 
 @SuppressWarnings("ConstantConditions")
-public class LoadCommand extends Command {
+public class LoadCommand extends AbstractTextResponseCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
 
     public LoadCommand() {
         super("load", "undump");
+
+        getPipeline()
+                .before(PipelineHandlers.argumentCheckHandler("Usage: {{prefix}}load <paste.dabbot.org dump url>", 1))
+                .before(PipelineHandlers.requiresUserInVoiceChannelHandler())
+                .before(PipelineHandlers.requiresNotInUseHandler());
     }
 
     @Override
-    public void on(CommandContext context) {
-        VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
-        if (channel == null) {
-            context.reply("You must be in a voice channel!");
-            return;
-        }
-
-        if (context.getArgs().isEmpty()) {
-            context.reply("Usage: `{{prefix}}load <dumped playlist url>`");
-            return;
-        }
-
-        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-
-        if (Utils.warnIfBotInUse(musicManager, context)) return;
-
+    public String textResponse(CommandContext context) {
         String url = context.getArgs().get(0);
         if (url.contains("hastebin.com") && !url.contains("raw")) {
             String name = url.substring(url.lastIndexOf("/") + 1);
@@ -50,11 +42,12 @@ public class LoadCommand extends Command {
             tracks = new JSONArray(response.body().string());
         } catch (IOException | JSONException e) {
             logger.error("error occurred loading tracks from a dump", e);
-            context.reply("An error occurred! %s", e.getMessage());
-            return;
+            return String.format("An error occurred! %s", e.getMessage());
         }
 
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
         TrackScheduler scheduler = musicManager.getTrackScheduler();
+
         scheduler.getQueue().clear();
         scheduler.setRepeat(false);
         scheduler.setLoop(false);
@@ -69,15 +62,15 @@ public class LoadCommand extends Command {
                 scheduler.queue(musicManager.getPlayer(), track);
             } catch (IOException e) {
                 logger.error("error occurred decoding encoded tracks", e);
-                context.reply("An error occurred! %s", e.getMessage());
-                return;
+                return String.format("An error occurred! %s", e.getMessage());
             }
         }
 
-        context.reply("Loaded %d tracks from <%s>!", tracks.length(), url);
-
         if (!musicManager.isOpen()) {
+            VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
             musicManager.open(channel);
         }
+
+        return String.format("Loaded %d tracks from <%s>!", tracks.length(), url);
     }
 }
