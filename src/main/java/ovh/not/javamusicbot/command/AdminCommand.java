@@ -8,6 +8,8 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.*;
+import ovh.not.javamusicbot.command.base.AbstractPipelineCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -16,7 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdminCommand extends Command {
+public class AdminCommand extends AbstractPipelineCommand {
     private static final Logger logger = LoggerFactory.getLogger(AdminCommand.class);
 
     private final Map<String, Command> subCommands = new HashMap<>();
@@ -24,6 +26,7 @@ public class AdminCommand extends Command {
 
     public AdminCommand() {
         super("admin", "a");
+
         CommandManager.register(subCommands,
                 new EvalCommand(),
                 new ShutdownCommand(),
@@ -32,26 +35,25 @@ public class AdminCommand extends Command {
                 new DecodeCommand(),
                 new ReloadCommand()
         );
+
         StringBuilder builder = new StringBuilder("Subcommands:");
         subCommands.values().forEach(command -> builder.append(" ").append(command.getNames()[0]));
         subCommandsString = builder.toString();
+
+        // only continue if the user is an owner
+        super.getPipeline().before(context ->
+                Utils.stringArrayContains(MusicBot.getConfigs().config.owners, context.getEvent().getAuthor().getId()));
+
+        // return the a list of sub commands if the args are empty
+        super.getPipeline().before(PipelineHandlers.argumentCheckHandler(subCommandsString, 1));
     }
 
     @Override
-    public void on(CommandContext context) {
-        if (!Utils.stringArrayContains(MusicBot.getConfigs().config.owners, context.getEvent().getAuthor().getId())) {
-            return;
-        }
-
-        if (context.getArgs().isEmpty()) {
-            context.reply(subCommandsString);
-            return;
-        }
-
+    public Object run(CommandContext context) {
         String name = context.getArgs().get(0);
         if (!subCommands.containsKey(name)) {
             context.reply("Invalid subcommand!");
-            return;
+            return null;
         }
 
         Command command = subCommands.get(name);
@@ -59,6 +61,7 @@ public class AdminCommand extends Command {
             context.getArgs().remove(0);
         }
         command.on(context);
+        return null;
     }
 
     private class ShutdownCommand extends Command {
