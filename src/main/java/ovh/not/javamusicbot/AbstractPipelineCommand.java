@@ -27,7 +27,7 @@ public abstract class AbstractPipelineCommand extends AbstractCommand {
 
     protected abstract Object run(CommandContext context);
 
-    public CommandPipeline getPipeline() {
+    protected CommandPipeline getPipeline() {
         return pipeline;
     }
 

@@ -45,9 +45,7 @@ public class CommandManager {
                 new SkipCommand(),
                 new SoundCloudCommand(this, playerManager),
                 new StopCommand(),
-                new VolumeCommand(),
-
-                new TestCommand() // todo remove this
+                new VolumeCommand()
         );
     }
 
