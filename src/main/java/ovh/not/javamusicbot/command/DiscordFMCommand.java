@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.*;
+import ovh.not.javamusicbot.command.base.AbstractNoResponsePipelineCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
-public class DiscordFMCommand extends Command {
+public class DiscordFMCommand extends AbstractNoResponsePipelineCommand {
     private static final Logger logger = LoggerFactory.getLogger(DiscordFMCommand.class);
 
     private static final String DFM_DIRECTORY_PATH = "discordfm/";
@@ -29,6 +31,10 @@ public class DiscordFMCommand extends Command {
         super("discordfm", "dfm");
         this.commandManager = commandManager;
         this.playerManager = playerManager;
+
+        getPipeline()
+                .before(PipelineHandlers.requiresUserInVoiceChannelHandler())
+                .before(PipelineHandlers.requiresNotInUseHandler());
     }
 
     private void load() {
@@ -55,13 +61,7 @@ public class DiscordFMCommand extends Command {
     }
 
     @Override
-    public void on(CommandContext context) {
-        VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
-        if (channel == null) {
-            context.reply("You must be in a voice channel!");
-            return;
-        }
-
+    public void noResponse(CommandContext context) {
         if (libraries == null || usageResponse == null) {
             Message msg = context.reply("Loading libraries..");
             load();
@@ -72,9 +72,6 @@ public class DiscordFMCommand extends Command {
             context.reply(usageResponse);
             return;
         }
-
-        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-        if (Utils.warnIfBotInUse(musicManager, context)) return;
 
         String libraryName = String.join(" ", context.getArgs());
 
@@ -101,6 +98,9 @@ public class DiscordFMCommand extends Command {
             return;
         }
 
+        MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+        musicManager.setTextChannelIfNotPresent(context.getEvent().getTextChannel());
+
         musicManager.getTrackScheduler().getQueue().clear();
         musicManager.getTrackScheduler().setRepeat(false);
         musicManager.getTrackScheduler().setLoop(false);
@@ -114,6 +114,7 @@ public class DiscordFMCommand extends Command {
         }
 
         if (!musicManager.isOpen()) {
+            VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
             musicManager.open(channel);
         }
     }
