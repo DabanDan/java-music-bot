@@ -117,7 +117,7 @@ public class PipelineHandlers {
         return (context, result) -> {
             if (result == null) return false;
 
-            OWO.upload(result.toString(), "text/plain").execute(file -> {
+            OWO.upload(result.toString(), "text/plain; charset=utf-8").execute(file -> {
                 callback.accept(context, Optional.of(file.getFullUrl()));
             }, throwable -> {
                 LOGGER.error("error uploading to owo", throwable);

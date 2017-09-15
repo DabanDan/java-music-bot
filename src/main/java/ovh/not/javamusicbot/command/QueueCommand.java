@@ -1,23 +1,22 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.bramhaag.owo.OwO;
-import okhttp3.*;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ovh.not.javamusicbot.*;
+import ovh.not.javamusicbot.CommandContext;
+import ovh.not.javamusicbot.GuildManager;
+import ovh.not.javamusicbot.MusicManager;
+import ovh.not.javamusicbot.Pageable;
+import ovh.not.javamusicbot.command.base.AbstractPipelineCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
 
-import static ovh.not.javamusicbot.MusicBot.JSON_MEDIA_TYPE;
 import static ovh.not.javamusicbot.Utils.*;
 
 @SuppressWarnings("unchecked")
-public class QueueCommand extends Command {
+public class QueueCommand extends AbstractPipelineCommand {
     private static final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     private static final String BASE_LINE = "%s by %s `[%s]`";
@@ -26,24 +25,24 @@ public class QueueCommand extends Command {
     private static final String SONG_QUEUE_LINE = "\n\n__Song queue:__ (Page **%d** of **%d**)";
     private static final int PAGE_SIZE = 10;
 
-    private final OwO owo;
-
     public QueueCommand() {
         super("queue", "list", "q");
-        owo = new OwO.Builder()
-                .setKey(MusicBot.getConfigs().config.owoKey)
-                .setUploadUrl("https://paste.dabbot.org")
-                .setShortenUrl("https://paste.dabbot.org")
-                .build();
+
+        getPipeline()
+                .before(PipelineHandlers.requiresMusicHandler())
+                .after(PipelineHandlers.textUploadTransformer((context, result) -> {
+                    if (!result.isPresent()) {
+                        context.reply("An error occurred!");
+                        return;
+                    }
+
+                    context.reply("Full song queue: %s", result.get());
+                }));
     }
 
     @Override
-    public void on(CommandContext context) {
+    public Object run(CommandContext context) {
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-        if (!musicManager.isPlayingMusic()) {
-            context.reply("No music is queued or playing on this guild! Add some using `{{prefix}}play <song name/link>`");
-            return;
-        }
 
         // todo clean up this big mess
         AudioTrack playing = musicManager.getPlayer().getPlayingTrack();
@@ -65,33 +64,7 @@ public class QueueCommand extends Command {
                     playing.getInfo().author, formatDuration(playing.getPosition()),
                     formatTrackDuration(playing)));
             builder.append(items.toString());
-            owo.upload(builder.toString(), "text/plain; charset=utf-8").execute(file -> {
-                context.reply("Full song queue: %s", file.getFullUrl());
-            }, throwable -> {
-                logger.error("error uploading to owo", throwable);
-
-                RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, builder.toString());
-
-                Request request = new Request.Builder()
-                        .url(HASTEBIN_URL)
-                        .method("POST", body)
-                        .build();
-
-                MusicBot.HTTP_CLIENT.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
-                        logger.error("error occurred posting to hastebin.com", e);
-                        context.reply("An error occurred!");
-                    }
-
-                    @Override
-                    public void onResponse(@Nonnull Call call, @Nonnull Response response) throws IOException {
-                        context.reply("Full song queue: https://hastebin.com/raw/%s",
-                                new JSONObject(response.body().string()).getString("key"));
-                        response.close();
-                    }
-                });
-            });
+            return builder.toString();
         } else {
             builder.append(String.format(CURRENT_LINE, playing.getInfo().title, playing.getInfo().author,
                     formatDuration(playing.getPosition()) + "/" + formatTrackDuration(playing)));
@@ -104,12 +77,12 @@ public class QueueCommand extends Command {
                 } catch (NumberFormatException e) {
                     context.reply("Invalid page! Must be an integer within the range %d - %d",
                             pageable.getMinPageRange(), pageable.getMaxPages());
-                    return;
+                    return null;
                 }
                 if (page < pageable.getMinPageRange() || page > pageable.getMaxPages()) {
                     context.reply("Invalid page! Must be an integer within the range %d - %d",
                             pageable.getMinPageRange(), pageable.getMaxPages());
-                    return;
+                    return null;
                 }
                 pageable.setPage(page);
             } else {
@@ -127,6 +100,7 @@ public class QueueCommand extends Command {
                         .append("`\nTo see the full queue, use `{{prefix}}queue all`");
             }
             context.reply(builder.toString());
+            return null;
         }
     }
 }
