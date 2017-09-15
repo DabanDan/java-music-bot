@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class PipelineCommand extends Command {
+public abstract class AbstractPipelineCommand extends Command {
     private CommandPipeline pipeline = null;
 
-    protected PipelineCommand(String name, String... names) {
+    protected AbstractPipelineCommand(String name, String... names) {
         super(name, names);
     }
 

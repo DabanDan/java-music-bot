@@ -1,13 +1,13 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.command.base.CachedTextResponseCommand;
+import ovh.not.javamusicbot.command.base.AbstractCachedTextResponseCommand;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.MusicBot;
 
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class HelpCommand extends CachedTextResponseCommand {
+public class HelpCommand extends AbstractCachedTextResponseCommand {
     public HelpCommand() {
         super("help", "commands", "h", "music");
     }

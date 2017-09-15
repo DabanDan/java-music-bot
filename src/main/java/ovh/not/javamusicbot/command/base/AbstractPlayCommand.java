@@ -10,13 +10,13 @@ import ovh.not.javamusicbot.Command;
 import java.util.List;
 import java.util.Set;
 
-public abstract class PlayCommand extends Command {
+public abstract class AbstractPlayCommand extends Command {
     private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
     protected boolean allowSearch = true;
     protected boolean isSearch = false;
 
-    protected PlayCommand(CommandManager commandManager, AudioPlayerManager playerManager, String name, String... names) {
+    protected AbstractPlayCommand(CommandManager commandManager, AudioPlayerManager playerManager, String name, String... names) {
         super(name, names);
         this.commandManager = commandManager;
         this.playerManager = playerManager;
