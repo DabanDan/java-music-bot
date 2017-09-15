@@ -6,7 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class AbstractPipelineCommand extends AbstractCommand {
-    private final CommandPipeline pipeline = new CommandPipeline();
+    private CommandPipeline pipeline = null;
 
     protected AbstractPipelineCommand(String name, String... names) {
         super(name, names);
@@ -14,20 +14,29 @@ public abstract class AbstractPipelineCommand extends AbstractCommand {
 
     @Override
     public void on(CommandContext context) {
-        for (Function<CommandContext, Boolean> beforeHanler : pipeline.beforeHanlers) {
-            if (!beforeHanler.apply(context)) return; // false = do not continue
+        boolean usingPipeline = pipeline != null;
+
+        if (usingPipeline) {
+            for (Function<CommandContext, Boolean> beforeHanler : pipeline.beforeHanlers) {
+                if (!beforeHanler.apply(context)) return; // false = do not continue
+            }
         }
 
         Object result = run(context);
 
-        for (BiFunction<CommandContext, Object, Boolean> afterHandler : pipeline.afterHandlers) {
-            if (!afterHandler.apply(context, result)) return; // false = do not continue
+        if (usingPipeline) {
+            for (BiFunction<CommandContext, Object, Boolean> afterHandler : pipeline.afterHandlers) {
+                if (!afterHandler.apply(context, result)) return; // false = do not continue
+            }
         }
     }
 
     protected abstract Object run(CommandContext context);
 
     protected CommandPipeline getPipeline() {
+        if (pipeline == null) {
+            pipeline = new CommandPipeline();
+        }
         return pipeline;
     }
 
