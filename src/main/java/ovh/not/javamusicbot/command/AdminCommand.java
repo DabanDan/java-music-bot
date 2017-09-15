@@ -13,19 +13,17 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdminCommand extends Command {
+public class AdminCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(AdminCommand.class);
 
-    private final Map<String, Command> subCommands = new HashMap<>();
+    private final Map<String, AbstractCommand> subCommands = new HashMap<>();
     private final String subCommandsString;
 
     public AdminCommand() {
         super("admin", "a");
-        hide = true;
         CommandManager.register(subCommands,
                 new EvalCommand(),
                 new ShutdownCommand(),
@@ -40,37 +38,43 @@ public class AdminCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         if (!Utils.stringArrayContains(MusicBot.getConfigs().config.owners, context.getEvent().getAuthor().getId())) {
             return;
         }
-        if (context.getArgs().length == 0) {
+
+        if (context.getArgs().isEmpty()) {
             context.reply(subCommandsString);
             return;
         }
-        if (!subCommands.containsKey(context.getArgs()[0])) {
+
+        String name = context.getArgs().get(0);
+        if (!subCommands.containsKey(name)) {
             context.reply("Invalid subcommand!");
             return;
         }
-        Command command = subCommands.get(context.getArgs()[0]);
-        context.setArgs(Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length));
+
+        AbstractCommand command = subCommands.get(name);
+        if (context.getArgs().size() > 0) {
+            context.getArgs().remove(0);
+        }
         command.on(context);
     }
 
-    private class ShutdownCommand extends Command {
+    private class ShutdownCommand extends AbstractCommand {
         private ShutdownCommand() {
             super("shutdown");
         }
 
         @Override
-        public void on(Context context) {
+        public void on(CommandContext context) {
             context.reply("Shutting down!");
             MusicBot.running = false; // break the running loop
             context.getEvent().getJDA().asBot().getShardManager().shutdown(); // shutdown jda
         }
     }
 
-    private class EvalCommand extends Command {
+    private class EvalCommand extends AbstractCommand {
         private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
         private EvalCommand() {
@@ -78,7 +82,7 @@ public class AdminCommand extends Command {
         }
 
         @Override
-        public void on(Context context) {
+        public void on(CommandContext context) {
             ScriptEngine engine = engineManager.getEngineByName("nashorn");
             engine.put("event", context.getEvent());
             engine.put("args", context.getArgs());
@@ -93,13 +97,13 @@ public class AdminCommand extends Command {
         }
     }
 
-    private class ShardRestartCommand extends Command {
+    private class ShardRestartCommand extends AbstractCommand {
         private ShardRestartCommand() {
             super("shardrestart", "sr");
         }
 
         @Override
-        public void on(Context context) {
+        public void on(CommandContext context) {
             MessageReceivedEvent event = context.getEvent();
             JDA jda = event.getJDA();
             ShardManager manager = jda.asBot().getShardManager();
@@ -107,17 +111,17 @@ public class AdminCommand extends Command {
             try {
                 int shardId;
 
-                if (context.getArgs().length == 0) {
+                if (context.getArgs().isEmpty()) {
                     shardId = jda.getShardInfo().getShardId();
                 } else {
                     try {
-                        shardId = Integer.parseInt(context.getArgs()[0]);
+                        shardId = Integer.parseInt(context.getArgs().get(0));
                         if (manager.getShard(shardId) == null) {
                             context.reply("Invalid shard %d.", shardId);
                             return;
                         }
                     } catch (NumberFormatException e) {
-                        context.reply("Invalid input %s. Must be an integer.", context.getArgs()[0]);
+                        context.reply("Invalid input %s. Must be an integer.", context.getArgs().get(0));
                         return;
                     }
                 }
@@ -130,13 +134,13 @@ public class AdminCommand extends Command {
         }
     }
 
-    private class EncodeCommand extends Command {
+    private class EncodeCommand extends AbstractCommand {
         private EncodeCommand() {
             super("encode");
         }
 
         @Override
-        public void on(Context context) {
+        public void on(CommandContext context) {
             MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
             if (!musicManager.isPlayingMusic()) {
                 context.reply("a track must be playing to encode it");
@@ -152,18 +156,18 @@ public class AdminCommand extends Command {
         }
     }
 
-    private class DecodeCommand extends Command {
+    private class DecodeCommand extends AbstractCommand {
         private DecodeCommand() {
             super("decode");
         }
 
         @Override
-        public void on(Context context) {
-            if (context.getArgs().length == 0) {
+        public void on(CommandContext context) {
+            if (context.getArgs().isEmpty()) {
                 context.reply("Usage: {{prefix}}a decode <base64 string>");
                 return;
             }
-            String base64 = context.getArgs()[0];
+            String base64 = context.getArgs().get(0);
 
             VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
             if (channel == null) {
@@ -189,13 +193,13 @@ public class AdminCommand extends Command {
         }
     }
 
-    private class ReloadCommand extends Command {
+    private class ReloadCommand extends AbstractCommand {
         private ReloadCommand() {
             super("reload");
         }
 
         @Override
-        public void on(Context context) {
+        public void on(CommandContext context) {
             try {
                 MusicBot.reloadConfigs();
                 RadioCommand.reloadUsageMessage();

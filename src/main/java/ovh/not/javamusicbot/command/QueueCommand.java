@@ -17,7 +17,7 @@ import static ovh.not.javamusicbot.MusicBot.JSON_MEDIA_TYPE;
 import static ovh.not.javamusicbot.Utils.*;
 
 @SuppressWarnings("unchecked")
-public class QueueCommand extends Command {
+public class QueueCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     private static final String BASE_LINE = "%s by %s `[%s]`";
@@ -38,7 +38,7 @@ public class QueueCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
         if (!musicManager.isPlayingMusic()) {
             context.reply("No music is queued or playing on this guild! Add some using `{{prefix}}play <song name/link>`");
@@ -49,7 +49,7 @@ public class QueueCommand extends Command {
         AudioTrack playing = musicManager.getPlayer().getPlayingTrack();
         Queue<AudioTrack> queue = musicManager.getTrackScheduler().getQueue();
         StringBuilder builder = new StringBuilder();
-        if (context.getArgs().length > 0 && context.getArgs()[0].equalsIgnoreCase("all")) {
+        if (!context.getArgs().isEmpty() && context.getArgs().get(0).equalsIgnoreCase("all")) {
             long durationTotal = playing.getDuration();
             List<AudioTrack> list = (List<AudioTrack>) queue;
             StringBuilder items = new StringBuilder();
@@ -97,10 +97,10 @@ public class QueueCommand extends Command {
                     formatDuration(playing.getPosition()) + "/" + formatTrackDuration(playing)));
             Pageable<AudioTrack> pageable = new Pageable<>((List<AudioTrack>) queue);
             pageable.setPageSize(PAGE_SIZE);
-            if (context.getArgs().length > 0) {
+            if (!context.getArgs().isEmpty()) {
                 int page;
                 try {
-                    page = Integer.parseInt(context.getArgs()[0]);
+                    page = Integer.parseInt(context.getArgs().get(0));
                 } catch (NumberFormatException e) {
                     context.reply("Invalid page! Must be an integer within the range %d - %d",
                             pageable.getMinPageRange(), pageable.getMaxPages());

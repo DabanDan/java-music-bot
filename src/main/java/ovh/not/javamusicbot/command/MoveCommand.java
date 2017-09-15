@@ -2,21 +2,18 @@ package ovh.not.javamusicbot.command;
 
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
-import ovh.not.javamusicbot.Command;
-import ovh.not.javamusicbot.GuildManager;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.Utils;
+import ovh.not.javamusicbot.*;
 
 import java.util.List;
 
-public class MoveCommand extends Command {
+public class MoveCommand extends AbstractCommand {
     public MoveCommand() {
         super("move");
     }
 
     @Override
-    public void on(Context context) {
-        if (context.getArgs().length == 0) {
+    public void on(CommandContext context) {
+        if (context.getArgs().isEmpty()) {
             context.reply("Usage: `{{prefix}}move <voice channel name>`");
             return;
         }

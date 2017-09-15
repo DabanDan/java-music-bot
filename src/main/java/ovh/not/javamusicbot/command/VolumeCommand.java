@@ -2,13 +2,13 @@ package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.*;
 
-public class VolumeCommand extends Command {
+public class VolumeCommand extends AbstractCommand {
     public VolumeCommand() {
         super("volume", "v");
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         if (!MusicBot.getConfigs().config.patreon) {
             context.reply("**The volume command is dabBot premium only!**" +
                     "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.");
@@ -27,13 +27,13 @@ public class VolumeCommand extends Command {
             return;
         }
 
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             context.reply("Current volume: **%d**", musicManager.getPlayer().getVolume());
             return;
         }
 
         try {
-            int newVolume = Math.max(1, Math.min(150, Integer.parseInt(context.getArgs()[0])));
+            int newVolume = Math.max(1, Math.min(150, Integer.parseInt(context.getArgs().get(0))));
             musicManager.getPlayer().setVolume(newVolume);
             context.reply("Set volume to **%d**", newVolume);
         } catch (NumberFormatException e) {

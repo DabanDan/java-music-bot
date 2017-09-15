@@ -16,7 +16,7 @@ import static ovh.not.javamusicbot.MusicBot.JSON_MEDIA_TYPE;
 import static ovh.not.javamusicbot.Utils.HASTEBIN_URL;
 import static ovh.not.javamusicbot.Utils.encode;
 
-public class DumpCommand extends Command {
+public class DumpCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(DumpCommand.class);
 
     private final OwO owo;
@@ -31,7 +31,7 @@ public class DumpCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
         if (!musicManager.isPlayingMusic()) {
             context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");

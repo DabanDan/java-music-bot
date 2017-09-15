@@ -13,7 +13,7 @@ import ovh.not.javamusicbot.*;
 import java.io.IOException;
 
 @SuppressWarnings("ConstantConditions")
-public class LoadCommand extends Command {
+public class LoadCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoadCommand.class);
 
     public LoadCommand() {
@@ -21,14 +21,14 @@ public class LoadCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
         if (channel == null) {
             context.reply("You must be in a voice channel!");
             return;
         }
 
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             context.reply("Usage: `{{prefix}}load <dumped playlist url>`");
             return;
         }
@@ -37,7 +37,7 @@ public class LoadCommand extends Command {
 
         if (Utils.warnIfBotInUse(musicManager, context)) return;
 
-        String url = context.getArgs()[0];
+        String url = context.getArgs().get(0);
         if (url.contains("hastebin.com") && !url.contains("raw")) {
             String name = url.substring(url.lastIndexOf("/") + 1);
             url = "https://hastebin.com/raw/" + name;

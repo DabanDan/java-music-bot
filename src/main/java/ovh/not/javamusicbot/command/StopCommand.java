@@ -1,17 +1,18 @@
 package ovh.not.javamusicbot.command;
 
 import net.dv8tion.jda.core.entities.Guild;
-import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
-public class StopCommand extends Command {
+public class StopCommand extends AbstractCommand {
     public StopCommand() {
         super("stop", "leave", "clear");
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         Guild guild = context.getEvent().getGuild();
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(guild);
         if (musicManager != null) {

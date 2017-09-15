@@ -6,9 +6,10 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import ovh.not.javamusicbot.*;
 
+import java.util.List;
 import java.util.Set;
 
-abstract class BasePlayCommand extends Command {
+abstract class BasePlayCommand extends AbstractCommand {
     private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
     boolean allowSearch = true;
@@ -21,8 +22,8 @@ abstract class BasePlayCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
-        if (context.getArgs().length == 0) {
+    public void on(CommandContext context) {
+        if (context.getArgs().isEmpty()) {
             context.reply(this.noArgumentMessage());
             return;
         }
@@ -49,7 +50,7 @@ abstract class BasePlayCommand extends Command {
             handler.setSetFirstInQueue(true);
         }
 
-        context.setArgs(this.transformQuery(context.getArgs()));
+        transformQuery(context.getArgs());
 
         playerManager.loadItem(String.join(" ", context.getArgs()), handler);
         if (!musicManager.isOpen()) {
@@ -59,7 +60,6 @@ abstract class BasePlayCommand extends Command {
 
     protected abstract String noArgumentMessage();
 
-    protected String[] transformQuery(String[] args) {
-        return args;
+    protected void transformQuery(List<String> args) {
     }
 }

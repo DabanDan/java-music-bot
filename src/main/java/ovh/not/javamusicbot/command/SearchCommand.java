@@ -1,9 +1,10 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.CommandManager;
 
-public class SearchCommand extends Command {
+public class SearchCommand extends AbstractCommand {
     private final CommandManager commandManager;
 
     public SearchCommand(CommandManager commandManager) {
@@ -12,18 +13,15 @@ public class SearchCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         // todo change to {{prefix}}search [youtube/soundcloud...] <term> (and default to youtube)
 
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             context.reply("Usage: `{{prefix}}search <term>` - searches for a song on youtube\n" +
                     "To add the song as first in the queue, use `{{prefix}}search <term> -first`");
             return;
         }
-        String[] args = new String[context.getArgs().length + 1];
-        args[0] = "ytsearch: ";
-        System.arraycopy(context.getArgs(), 0, args, 1, context.getArgs().length);
-        context.setArgs(args);
+        context.getArgs().add(0, "ytsearch:");
         commandManager.getCommands().get("play").on(context);
     }
 }

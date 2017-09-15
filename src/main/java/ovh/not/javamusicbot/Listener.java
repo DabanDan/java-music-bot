@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,22 +61,24 @@ class Listener extends ListenerAdapter {
         }
 
         String name = matcher.group(1).toLowerCase();
-        Command command = commandManager.getCommand(name);
+        AbstractCommand command = commandManager.getCommand(name);
         if (command == null) {
             return;
         }
 
-        Command.Context context = command.new Context();
-        context.setEvent(event);
+        List<String> args;
         if (matcher.groupCount() > 1) {
             String[] matches = matcher.group(2).split("\\s+");
             if (matches.length > 0 && matches[0].equals("")) {
                 matches = new String[0];
             }
-            context.setArgs(matches);
+
+            args = new ArrayList<>(Arrays.asList(matches));
+        } else {
+            args = Collections.emptyList();
         }
 
-        command.on(context);
+        command.on(new CommandContext(event, args));
     }
 
     @Override

@@ -8,22 +8,20 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ovh.not.javamusicbot.Utils;
-
 public class LoadResultHandler implements AudioLoadResultHandler {
     private static final Logger logger = LoggerFactory.getLogger(LoadResultHandler.class);
 
     private final CommandManager commandManager;
     private final MusicManager musicManager;
     private final AudioPlayerManager playerManager;
-    private final Command.Context context;
+    private final CommandContext context;
   
     private boolean verbose;
     private boolean isSearch;
     private boolean allowSearch;
     private boolean setFirstInQueue;
 
-    public LoadResultHandler(CommandManager commandManager, MusicManager musicManager, AudioPlayerManager playerManager, Command.Context context) {
+    public LoadResultHandler(CommandManager commandManager, MusicManager musicManager, AudioPlayerManager playerManager, CommandContext context) {
         this.commandManager = commandManager;
         this.musicManager = musicManager;
         this.playerManager = playerManager;

@@ -139,7 +139,7 @@ public abstract class Utils {
     }
 
     // sends a reply to the context is the bot is in use in a voice channel
-    public static boolean warnIfBotInUse(MusicManager musicManager, Command.Context context) {
+    public static boolean warnIfBotInUse(MusicManager musicManager, CommandContext context) {
         if (isBotInUse(musicManager, context.getEvent().getMember())) {
             context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the " +
                     "`Move Members` permission can do this.", musicManager.getVoiceChannel().get().getName());

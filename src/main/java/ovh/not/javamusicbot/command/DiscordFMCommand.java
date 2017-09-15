@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
-public class DiscordFMCommand extends Command {
+public class DiscordFMCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(DiscordFMCommand.class);
 
     private static final String DFM_DIRECTORY_PATH = "discordfm/";
@@ -55,7 +55,7 @@ public class DiscordFMCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
         if (channel == null) {
             context.reply("You must be in a voice channel!");
@@ -68,7 +68,7 @@ public class DiscordFMCommand extends Command {
             msg.delete().queue();
         }
 
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             context.reply(usageResponse);
             return;
         }

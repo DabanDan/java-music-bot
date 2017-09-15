@@ -1,21 +1,22 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 import java.util.List;
 
-public class RemoveCommand extends Command {
+public class RemoveCommand extends AbstractCommand {
     public RemoveCommand() {
         super("remove", "delete", "rm");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void on(Context context) {
-        if (context.getArgs().length < 1) {
+    public void on(CommandContext context) {
+        if (context.getArgs().isEmpty()) {
             context.reply("Usage: `{{prefix}}remove <song position>`\nExample: `{{prefix}}remove 5` - moves song at "
                     + "position 5 in queue");
             return;
@@ -29,7 +30,7 @@ public class RemoveCommand extends Command {
 
         int position;
         try {
-            position = Integer.parseInt(context.getArgs()[0]);
+            position = Integer.parseInt(context.getArgs().get(0));
         } catch (NumberFormatException e) {
             context.reply("Invalid song position!");
             return;

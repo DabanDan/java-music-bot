@@ -2,11 +2,12 @@ package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.core.entities.Member;
-import ovh.not.javamusicbot.Command;
+import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.CommandManager;
 import ovh.not.javamusicbot.Selection;
 
-public class ChooseCommand extends Command {
+public class ChooseCommand extends AbstractCommand {
     private final CommandManager commandManager;
 
     public ChooseCommand(CommandManager commandManager) {
@@ -15,7 +16,7 @@ public class ChooseCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         Member member = context.getEvent().getMember();
         if (!commandManager.getSelectors().containsKey(member)) {
             context.reply("There's no selection active in this guild - are you sure you ran `{{prefix}}play`?\n\n" +
@@ -26,12 +27,12 @@ public class ChooseCommand extends Command {
             return;
         }
         Selection<AudioTrack, String> selection = commandManager.getSelectors().get(member);
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             commandManager.getSelectors().remove(member);
             selection.getCallback().accept(false, null);
             return;
         }
-        switch (context.getArgs()[0].toLowerCase()) {
+        switch (context.getArgs().get(0).toLowerCase()) {
             case "c":
             case "cancel":
                 commandManager.getSelectors().remove(member);

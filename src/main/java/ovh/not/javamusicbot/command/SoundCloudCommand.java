@@ -3,6 +3,8 @@ package ovh.not.javamusicbot.command;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import ovh.not.javamusicbot.CommandManager;
 
+import java.util.List;
+
 public class SoundCloudCommand extends BasePlayCommand {
     public SoundCloudCommand(CommandManager commandManager, AudioPlayerManager playerManager) {
         super(commandManager, playerManager, "soundcloud", "sc");
@@ -18,8 +20,7 @@ public class SoundCloudCommand extends BasePlayCommand {
     }
 
     @Override
-    protected String[] transformQuery(String[] args) {
-        args[0] = "scsearch:" + args[0];
-        return args;
+    protected void transformQuery(List<String> args) {
+        args.add(0, "scsearch:");
     }
 }

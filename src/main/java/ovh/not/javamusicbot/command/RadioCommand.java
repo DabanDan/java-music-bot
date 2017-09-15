@@ -9,7 +9,7 @@ import ovh.not.javamusicbot.*;
 import java.util.Iterator;
 import java.util.Map;
 
-public class RadioCommand extends Command {
+public class RadioCommand extends AbstractCommand {
     private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
 
@@ -39,9 +39,9 @@ public class RadioCommand extends Command {
     }
 
     @Override
-    public void on(Context context) {
+    public void on(CommandContext context) {
         // todo sort out this mess
-        if (context.getArgs().length == 0) {
+        if (context.getArgs().isEmpty()) {
             if (usageMessage.length() < 2000) {
                 context.reply(usageMessage);
             }
