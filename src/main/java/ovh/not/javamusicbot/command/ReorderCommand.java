@@ -1,7 +1,7 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
@@ -9,7 +9,7 @@ import ovh.not.javamusicbot.MusicManager;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class ReorderCommand extends AbstractCommand {
+public class ReorderCommand extends Command {
     public ReorderCommand() {
         super("reorder", "order");
     }

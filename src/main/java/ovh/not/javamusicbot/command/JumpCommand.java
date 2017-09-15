@@ -1,6 +1,6 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JumpCommand extends AbstractCommand {
+public class JumpCommand extends Command {
     private static final Pattern TIME_PATTERN = Pattern.compile("(?:(?<hours>\\d{1,2}):)?(?:(?<minutes>\\d{1,2}):)?(?<seconds>\\d{1,2})");
 
     public JumpCommand() {

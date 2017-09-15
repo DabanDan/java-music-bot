@@ -1,7 +1,7 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
@@ -9,7 +9,7 @@ import ovh.not.javamusicbot.MusicManager;
 import static ovh.not.javamusicbot.Utils.formatDuration;
 import static ovh.not.javamusicbot.Utils.formatTrackDuration;
 
-public class NowPlayingCommand extends AbstractCommand {
+public class NowPlayingCommand extends Command {
     private static final String NOW_PLAYING_FORMAT = "Currently playing **%s** by **%s** `[%s/%s]`\nSong URL: %s";
 
     public NowPlayingCommand() {

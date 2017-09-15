@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdminCommand extends AbstractCommand {
+public class AdminCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(AdminCommand.class);
 
-    private final Map<String, AbstractCommand> subCommands = new HashMap<>();
+    private final Map<String, Command> subCommands = new HashMap<>();
     private final String subCommandsString;
 
     public AdminCommand() {
@@ -54,14 +54,14 @@ public class AdminCommand extends AbstractCommand {
             return;
         }
 
-        AbstractCommand command = subCommands.get(name);
+        Command command = subCommands.get(name);
         if (context.getArgs().size() > 0) {
             context.getArgs().remove(0);
         }
         command.on(context);
     }
 
-    private class ShutdownCommand extends AbstractCommand {
+    private class ShutdownCommand extends Command {
         private ShutdownCommand() {
             super("shutdown");
         }
@@ -74,7 +74,7 @@ public class AdminCommand extends AbstractCommand {
         }
     }
 
-    private class EvalCommand extends AbstractCommand {
+    private class EvalCommand extends Command {
         private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
         private EvalCommand() {
@@ -97,7 +97,7 @@ public class AdminCommand extends AbstractCommand {
         }
     }
 
-    private class ShardRestartCommand extends AbstractCommand {
+    private class ShardRestartCommand extends Command {
         private ShardRestartCommand() {
             super("shardrestart", "sr");
         }
@@ -134,7 +134,7 @@ public class AdminCommand extends AbstractCommand {
         }
     }
 
-    private class EncodeCommand extends AbstractCommand {
+    private class EncodeCommand extends Command {
         private EncodeCommand() {
             super("encode");
         }
@@ -156,7 +156,7 @@ public class AdminCommand extends AbstractCommand {
         }
     }
 
-    private class DecodeCommand extends AbstractCommand {
+    private class DecodeCommand extends Command {
         private DecodeCommand() {
             super("decode");
         }
@@ -193,7 +193,7 @@ public class AdminCommand extends AbstractCommand {
         }
     }
 
-    private class ReloadCommand extends AbstractCommand {
+    private class ReloadCommand extends Command {
         private ReloadCommand() {
             super("reload");
         }

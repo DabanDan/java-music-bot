@@ -61,7 +61,7 @@ class Listener extends ListenerAdapter {
         }
 
         String name = matcher.group(1).toLowerCase();
-        AbstractCommand command = commandManager.getCommand(name);
+        Command command = commandManager.getCommand(name);
         if (command == null) {
             return;
         }

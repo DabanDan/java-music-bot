@@ -2,7 +2,7 @@ package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.*;
 
-public class VolumeCommand extends AbstractCommand {
+public class VolumeCommand extends Command {
     public VolumeCommand() {
         super("volume", "v");
     }

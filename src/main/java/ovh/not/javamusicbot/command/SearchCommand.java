@@ -1,10 +1,10 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.CommandManager;
 
-public class SearchCommand extends AbstractCommand {
+public class SearchCommand extends Command {
     private final CommandManager commandManager;
 
     public SearchCommand(CommandManager commandManager) {

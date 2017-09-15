@@ -16,7 +16,7 @@ import static ovh.not.javamusicbot.MusicBot.JSON_MEDIA_TYPE;
 import static ovh.not.javamusicbot.Utils.HASTEBIN_URL;
 import static ovh.not.javamusicbot.Utils.encode;
 
-public class DumpCommand extends AbstractCommand {
+public class DumpCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(DumpCommand.class);
 
     private final OwO owo;

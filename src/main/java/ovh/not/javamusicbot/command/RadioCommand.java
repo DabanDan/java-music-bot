@@ -9,7 +9,7 @@ import ovh.not.javamusicbot.*;
 import java.util.Iterator;
 import java.util.Map;
 
-public class RadioCommand extends AbstractCommand {
+public class RadioCommand extends Command {
     private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
 

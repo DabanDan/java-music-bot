@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandManager {
-    private final Map<String, AbstractCommand> commands = new HashMap<>();
+    private final Map<String, Command> commands = new HashMap<>();
     private final Map<Member, Selection<AudioTrack, String>> selectors = new HashMap<>();
 
     CommandManager() {
@@ -49,7 +49,7 @@ public class CommandManager {
         );
     }
 
-    public Map<String, AbstractCommand> getCommands() {
+    public Map<String, Command> getCommands() {
         return commands;
     }
 
@@ -58,11 +58,11 @@ public class CommandManager {
     }
 
 
-    public static void register(Map<String, AbstractCommand> commands, AbstractCommand... cmds) {
-        for (AbstractCommand command : cmds) {
+    public static void register(Map<String, Command> commands, Command... cmds) {
+        for (Command command : cmds) {
             for (String name : command.getNames()) {
                 if (commands.containsKey(name)) {
-                    throw new RuntimeException(String.format("AbstractCommand name collision %s in %s!", name,
+                    throw new RuntimeException(String.format("Command name collision %s in %s!", name,
                             command.getClass().getName()));
                 }
                 commands.put(name, command);
@@ -70,7 +70,7 @@ public class CommandManager {
         }
     }
 
-    AbstractCommand getCommand(String name) {
+    Command getCommand(String name) {
         return commands.get(name);
     }
 }

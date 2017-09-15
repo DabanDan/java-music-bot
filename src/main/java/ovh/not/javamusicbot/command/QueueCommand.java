@@ -17,7 +17,7 @@ import static ovh.not.javamusicbot.MusicBot.JSON_MEDIA_TYPE;
 import static ovh.not.javamusicbot.Utils.*;
 
 @SuppressWarnings("unchecked")
-public class QueueCommand extends AbstractCommand {
+public class QueueCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     private static final String BASE_LINE = "%s by %s `[%s]`";

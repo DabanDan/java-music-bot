@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
-public class DiscordFMCommand extends AbstractCommand {
+public class DiscordFMCommand extends Command {
     private static final Logger logger = LoggerFactory.getLogger(DiscordFMCommand.class);
 
     private static final String DFM_DIRECTORY_PATH = "discordfm/";

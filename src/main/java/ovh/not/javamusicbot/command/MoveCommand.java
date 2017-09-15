@@ -6,7 +6,7 @@ import ovh.not.javamusicbot.*;
 
 import java.util.List;
 
-public class MoveCommand extends AbstractCommand {
+public class MoveCommand extends Command {
     public MoveCommand() {
         super("move");
     }

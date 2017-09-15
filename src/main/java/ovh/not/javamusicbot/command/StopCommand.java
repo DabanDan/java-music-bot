@@ -1,12 +1,12 @@
 package ovh.not.javamusicbot.command;
 
 import net.dv8tion.jda.core.entities.Guild;
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
-public class StopCommand extends AbstractCommand {
+public class StopCommand extends Command {
     public StopCommand() {
         super("stop", "leave", "clear");
     }

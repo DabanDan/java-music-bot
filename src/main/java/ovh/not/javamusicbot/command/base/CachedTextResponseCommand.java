@@ -1,9 +1,11 @@
-package ovh.not.javamusicbot;
+package ovh.not.javamusicbot.command.base;
 
-public abstract class AbstractCachedTextResponseCommand extends AbstractTextResponseCommand {
+import ovh.not.javamusicbot.CommandContext;
+
+public abstract class CachedTextResponseCommand extends TextResponseCommand {
     private String cache = null;
 
-    protected AbstractCachedTextResponseCommand(String name, String... names) {
+    protected CachedTextResponseCommand(String name, String... names) {
         super(name, names);
     }
 

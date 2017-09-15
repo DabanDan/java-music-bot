@@ -2,12 +2,12 @@ package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.core.entities.Member;
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.CommandManager;
 import ovh.not.javamusicbot.Selection;
 
-public class ChooseCommand extends AbstractCommand {
+public class ChooseCommand extends Command {
     private final CommandManager commandManager;
 
     public ChooseCommand(CommandManager commandManager) {

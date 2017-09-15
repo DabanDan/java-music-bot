@@ -1,6 +1,6 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
@@ -8,7 +8,7 @@ import ovh.not.javamusicbot.MusicManager;
 import java.util.Collections;
 import java.util.List;
 
-public class ShuffleCommand extends AbstractCommand {
+public class ShuffleCommand extends Command {
     public ShuffleCommand() {
         super("shuffle");
     }

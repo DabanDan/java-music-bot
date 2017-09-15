@@ -1,14 +1,14 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
 import java.util.List;
 
-public class RemoveCommand extends AbstractCommand {
+public class RemoveCommand extends Command {
     public RemoveCommand() {
         super("remove", "delete", "rm");
     }

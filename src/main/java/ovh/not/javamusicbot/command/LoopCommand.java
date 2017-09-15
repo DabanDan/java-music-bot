@@ -1,11 +1,11 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
-public class LoopCommand extends AbstractCommand {
+public class LoopCommand extends Command {
     public LoopCommand() {
         super("loop");
     }

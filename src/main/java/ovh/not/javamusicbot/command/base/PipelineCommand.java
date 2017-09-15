@@ -1,14 +1,17 @@
-package ovh.not.javamusicbot;
+package ovh.not.javamusicbot.command.base;
+
+import ovh.not.javamusicbot.CommandContext;
+import ovh.not.javamusicbot.Command;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class AbstractPipelineCommand extends AbstractCommand {
+public abstract class PipelineCommand extends Command {
     private CommandPipeline pipeline = null;
 
-    protected AbstractPipelineCommand(String name, String... names) {
+    protected PipelineCommand(String name, String... names) {
         super(name, names);
     }
 

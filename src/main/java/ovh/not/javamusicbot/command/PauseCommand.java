@@ -1,11 +1,11 @@
 package ovh.not.javamusicbot.command;
 
-import ovh.not.javamusicbot.AbstractCommand;
+import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
 import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.MusicManager;
 
-public class PauseCommand extends AbstractCommand {
+public class PauseCommand extends Command {
     public PauseCommand() {
         super("pause", "resume");
     }
