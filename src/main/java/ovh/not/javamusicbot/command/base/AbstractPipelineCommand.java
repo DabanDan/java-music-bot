@@ -9,8 +9,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class AbstractPipelineCommand extends Command {
-    protected static final byte BEFORE_HANDLERS_SCOPE = 0x1;
-    protected static final byte AFTER_HANDLERS_SCOPE = 0x2;
+    static final byte BEFORE_HANDLERS_SCOPE = 0x1;
+    private static final byte AFTER_HANDLERS_SCOPE = 0x2;
 
     private CommandPipeline pipeline = null;
     private byte handlersScope = BEFORE_HANDLERS_SCOPE | AFTER_HANDLERS_SCOPE;
@@ -47,7 +47,7 @@ public abstract class AbstractPipelineCommand extends Command {
         return pipeline;
     }
 
-    public void setHandlersScope(byte handlersScope) {
+    void setHandlersScope(byte handlersScope) {
         this.handlersScope = handlersScope;
     }
 
