@@ -2,10 +2,7 @@ package ovh.not.javamusicbot.command.base;
 
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import ovh.not.javamusicbot.CommandContext;
-import ovh.not.javamusicbot.GuildManager;
-import ovh.not.javamusicbot.MusicManager;
-import ovh.not.javamusicbot.Utils;
+import ovh.not.javamusicbot.*;
 
 import java.util.function.Function;
 
@@ -64,6 +61,37 @@ public class PipelineHandlers {
             if (Utils.isBotInUse(musicManager, event.getMember())) {
                 context.reply("dabBot is already playing music in %s so it cannot be moved. Members with the " +
                         "`Move Members` permission can do this.", musicManager.getVoiceChannel().get().getName());
+                return false;
+            } else {
+                return true;
+            }
+        };
+    }
+
+    public static Function<CommandContext, Boolean> patronOnlyCommandHandler() {
+        return context -> {
+            if (!MusicBot.getConfigs().config.patreon) {
+                context.reply("**The volume command is dabBot premium only!**\nDonate for the `Super supporter` " +
+                        "tier on Patreon at https://patreon.com/dabbot to gain access.");
+                return false;
+            } else {
+                return true;
+            }
+        };
+    }
+
+    /*
+    if (!Utils.allowedSuperSupporterPatronAccess(context.getEvent().getGuild())) {
+            return "**The volume command is dabBot premium only!**" +
+                    "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.";
+        }
+     */
+
+    public static Function<CommandContext, Boolean> requireSuperSupporterHandler() {
+        return context -> {
+            if (!Utils.allowedSuperSupporterPatronAccess(context.getEvent().getGuild())) {
+                context.reply("**The volume command is dabBot premium only!**\nDonate for the `Super supporter` tier" +
+                        " on Patreon at https://patreon.com/dabbot to gain access.");
                 return false;
             } else {
                 return true;

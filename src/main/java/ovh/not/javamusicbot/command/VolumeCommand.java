@@ -1,43 +1,39 @@
 package ovh.not.javamusicbot.command;
 
 import ovh.not.javamusicbot.*;
+import ovh.not.javamusicbot.command.base.AbstractTextResponseCommand;
+import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
-public class VolumeCommand extends Command {
+public class VolumeCommand extends AbstractTextResponseCommand {
     public VolumeCommand() {
         super("volume", "v");
+
+        // require music playing, patron bot enabled and super supporter role
+        getPipeline()
+                .before(PipelineHandlers.requiresMusicHandler())
+                .before(PipelineHandlers.patronOnlyCommandHandler())
+                .before(PipelineHandlers.requireSuperSupporterHandler());
     }
 
     @Override
-    public void on(CommandContext context) {
-        if (!MusicBot.getConfigs().config.patreon) {
-            context.reply("**The volume command is dabBot premium only!**" +
-                    "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.");
-            return;
+    public String textResponse(CommandContext context) {
+        if (!Utils.allowedSuperSupporterPatronAccess(context.getEvent().getGuild())) {
+            return "**The volume command is dabBot premium only!**" +
+                    "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.";
         }
 
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-        if (!musicManager.isPlayingMusic()) {
-            context.reply("No music is playing on this guild! To play a song use `{{prefix}}play`");
-            return;
-        }
-
-        if (!Utils.allowedSuperSupporterPatronAccess(context.getEvent().getGuild())) {
-            context.reply("**The volume command is dabBot premium only!**" +
-                    "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.");
-            return;
-        }
 
         if (context.getArgs().isEmpty()) {
-            context.reply("Current volume: **%d**", musicManager.getPlayer().getVolume());
-            return;
+            return String.format("Current volume: **%d**", musicManager.getPlayer().getVolume());
         }
 
         try {
             int newVolume = Math.max(1, Math.min(150, Integer.parseInt(context.getArgs().get(0))));
             musicManager.getPlayer().setVolume(newVolume);
-            context.reply("Set volume to **%d**", newVolume);
+            return String.format("Set volume to **%d**", newVolume);
         } catch (NumberFormatException e) {
-            context.reply("Invalid volume. Bounds: `10 - 100`");
+            return "Invalid volume. Bounds: `10 - 100`";
         }
     }
 }
