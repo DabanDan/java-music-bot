@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.*;
 import ovh.not.javamusicbot.command.base.AbstractPipelineCommand;
+import ovh.not.javamusicbot.command.base.AbstractTextResponseCommand;
 import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
 import javax.script.ScriptEngine;
@@ -17,12 +18,12 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AdminCommand extends AbstractPipelineCommand {
     private static final Logger logger = LoggerFactory.getLogger(AdminCommand.class);
 
     private final Map<String, Command> subCommands = new HashMap<>();
-    private final String subCommandsString;
 
     public AdminCommand() {
         super("admin", "a");
@@ -36,16 +37,15 @@ public class AdminCommand extends AbstractPipelineCommand {
                 new ReloadCommand()
         );
 
-        StringBuilder builder = new StringBuilder("Subcommands:");
-        subCommands.values().forEach(command -> builder.append(" ").append(command.getNames()[0]));
-        subCommandsString = builder.toString();
-
         // only continue if the user is an owner
         super.getPipeline().before(context ->
                 Utils.stringArrayContains(MusicBot.getConfigs().config.owners, context.getEvent().getAuthor().getId()));
 
         // return the a list of sub commands if the args are empty
-        super.getPipeline().before(PipelineHandlers.argumentCheckHandler(subCommandsString, 1));
+        super.getPipeline().before(PipelineHandlers.argumentCheckHandler(String
+                .format("Admin commands: %s", subCommands.values().stream()
+                        .map(command -> command.getNames()[0])
+                        .collect(Collectors.joining(", "))), 1));
     }
 
     @Override
@@ -60,6 +60,7 @@ public class AdminCommand extends AbstractPipelineCommand {
         if (context.getArgs().size() > 0) {
             context.getArgs().remove(0);
         }
+
         command.on(context);
         return null;
     }
@@ -77,25 +78,37 @@ public class AdminCommand extends AbstractPipelineCommand {
         }
     }
 
-    private class EvalCommand extends Command {
+    private class EvalCommand extends AbstractTextResponseCommand {
         private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
         private EvalCommand() {
             super("eval", "js");
+
+            // require some code ;p
+            this.getPipeline().before(PipelineHandlers.argumentCheckHandler("Usage: {{prefix}}eval <code>", 1));
         }
 
         @Override
-        public void on(CommandContext context) {
+        public String textResponse(CommandContext context) {
             ScriptEngine engine = engineManager.getEngineByName("nashorn");
             engine.put("event", context.getEvent());
             engine.put("args", context.getArgs());
             engine.put("jda", context.getEvent().getJDA());
+
             try {
                 Object result = engine.eval(String.join(" ", context.getArgs()));
-                if (result != null) context.reply(result.toString());
+
+                if (result != null) {
+                    return result.toString();
+                } else {
+                    return null;
+                }
             } catch (ScriptException e) {
                 logger.error("error performing eval command", e);
-                context.reply(e.getMessage());
+
+                // todo add error to a paste instead of sentry as it isnt a code error
+
+                return String.format("An error occurred: %s", e.getMessage());
             }
         }
     }
@@ -137,46 +150,42 @@ public class AdminCommand extends AbstractPipelineCommand {
         }
     }
 
-    private class EncodeCommand extends Command {
+    private class EncodeCommand extends AbstractTextResponseCommand {
         private EncodeCommand() {
             super("encode");
+
+            // ensure there is a track playing before trying to encode it or NPE!! :)
+            this.getPipeline().before(PipelineHandlers.requiresMusicHandler());
         }
 
         @Override
-        public void on(CommandContext context) {
+        public String textResponse(CommandContext context) {
             MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
-            if (!musicManager.isPlayingMusic()) {
-                context.reply("a track must be playing to encode it");
-                return;
-            }
 
             try {
-                context.reply(Utils.encode(musicManager.getPlayer().getPlayingTrack()));
+                return Utils.encode(musicManager.getPlayer().getPlayingTrack());
             } catch (IOException e) {
                 logger.error("error performing encode command", e);
-                context.reply("An error occurred!");
+                return String.format("An error occurred: %s", e.getMessage());
             }
         }
     }
 
-    private class DecodeCommand extends Command {
+    private class DecodeCommand extends AbstractPipelineCommand {
+        private static final String INVALID_ARGUMENTS_MESSAGE = "Usage: {{prefix}}a decode <base64 string>";
+
         private DecodeCommand() {
             super("decode");
+
+            // require at least 1 argument and that the user is in a voice channel
+            super.getPipeline()
+                    .before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1))
+                    .before(PipelineHandlers.requiresUserInVoiceChannelHandler());
         }
 
         @Override
-        public void on(CommandContext context) {
-            if (context.getArgs().isEmpty()) {
-                context.reply("Usage: {{prefix}}a decode <base64 string>");
-                return;
-            }
+        public Object run(CommandContext context) {
             String base64 = context.getArgs().get(0);
-
-            VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
-            if (channel == null) {
-                context.reply("Must be in a voice channel!");
-                return;
-            }
 
             AudioTrack track;
             try {
@@ -184,34 +193,37 @@ public class AdminCommand extends AbstractPipelineCommand {
             } catch (IOException e) {
                 logger.error("error performing decode command", e);
                 context.reply("An error occurred!");
-                return;
+                return null;
             }
 
             MusicManager musicManager = GuildManager.getInstance().getMusicManager(context.getEvent().getGuild());
+            VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
+
             if (!musicManager.isOpen()) {
                 musicManager.open(channel);
             }
 
             musicManager.getPlayer().playTrack(track);
+            return null;
         }
     }
 
-    private class ReloadCommand extends Command {
+    private class ReloadCommand extends AbstractTextResponseCommand {
         private ReloadCommand() {
             super("reload");
         }
 
         @Override
-        public void on(CommandContext context) {
+        public String textResponse(CommandContext context) {
             try {
                 MusicBot.reloadConfigs();
                 RadioCommand.reloadUsageMessage();
+
+                return "Configs reloaded!";
             } catch (Exception e) {
                 logger.error("error performing reload command", e);
-                context.reply("Could not reload configs: " + e.getMessage());
-                return;
+                return "Could not reload configs: " + e.getMessage();
             }
-            context.reply("Configs reloaded!");
         }
     }
 }

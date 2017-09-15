@@ -18,6 +18,10 @@ public class GuildManager {
         this.lavalink = Optional.of(lavalink);
     }
 
+    public boolean hasMusicManager(String guildId) {
+        return musicManagers.containsKey(guildId);
+    }
+
     public MusicManager getMusicManager(Guild guild) {
         return musicManagers.computeIfAbsent(guild.getId(), k -> new MusicManager(lavalink.orElseThrow(() ->
                         new RuntimeException("lavalink must be present to get a guild's MusicManager")), guild));
