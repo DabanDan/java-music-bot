@@ -72,6 +72,11 @@ public class TrackScheduler extends AudioEventAdapterWrapped {
                 queue.add(last.makeClone());
             }
             track = queue.poll();
+
+            // potential fix #84
+            if (track != null) {
+                track = track.makeClone();
+            }
         }
 
         if (track == null) {
