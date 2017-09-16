@@ -30,7 +30,7 @@ public class CommandManager {
                 new MoveCommand(),
                 new NowPlayingCommand(),
                 new PauseCommand(),
-                new PlayCommand(this, playerManager),
+                new PlayCommand(playerManager),
                 new QueueCommand(),
                 new RadioCommand(this, playerManager),
                 new RemoveCommand(),
@@ -40,7 +40,7 @@ public class CommandManager {
                 new SearchCommand(this),
                 new ShuffleCommand(),
                 new SkipCommand(),
-                new SoundCloudCommand(this, playerManager),
+                new SoundCloudCommand(playerManager),
                 new StopCommand(),
                 new VolumeCommand()
         );

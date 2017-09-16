@@ -1,7 +1,6 @@
 package ovh.not.javamusicbot.command;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import ovh.not.javamusicbot.CommandManager;
 import ovh.not.javamusicbot.command.base.AbstractPlayCommand;
 import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
@@ -11,8 +10,8 @@ public class PlayCommand extends AbstractPlayCommand {
             "To search SoundCloud, use `{{prefix}}soundcloud <soundcloud song name>`\n" +
             "To add as first in queue, use `{{prefix}}play <link> -first`";
 
-    public PlayCommand(CommandManager commandManager, AudioPlayerManager playerManager) {
-        super(commandManager, playerManager, "play", "p");
+    public PlayCommand(AudioPlayerManager playerManager) {
+        super(playerManager, "play", "p");
 
         getPipeline().before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1));
     }

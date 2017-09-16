@@ -9,14 +9,12 @@ import ovh.not.javamusicbot.*;
 import java.util.Set;
 
 public abstract class AbstractPlayCommand extends AbstractNoResponsePipelineCommand {
-    private final CommandManager commandManager;
     private final AudioPlayerManager playerManager;
     protected boolean allowSearch = true;
     protected boolean isSearch = false;
 
-    protected AbstractPlayCommand(CommandManager commandManager, AudioPlayerManager playerManager, String name, String... names) {
+    protected AbstractPlayCommand(AudioPlayerManager playerManager, String name, String... names) {
         super(name, names);
-        this.commandManager = commandManager;
         this.playerManager = playerManager;
 
         getPipeline().before(PipelineHandlers
