@@ -6,7 +6,6 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import ovh.not.javamusicbot.*;
 
-import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractPlayCommand extends AbstractNoResponsePipelineCommand {
@@ -33,7 +32,7 @@ public abstract class AbstractPlayCommand extends AbstractNoResponsePipelineComm
         MusicManager musicManager = GuildManager.getInstance().getMusicManager(guild);
         musicManager.setTextChannelIfNotPresent(event.getTextChannel());
 
-        LoadResultHandler handler = new LoadResultHandler(commandManager, musicManager, playerManager, context);
+        LoadResultHandler handler = new LoadResultHandler(musicManager, playerManager, context);
         handler.setAllowSearch(allowSearch);
         handler.setSearch(isSearch);
       
@@ -42,16 +41,11 @@ public abstract class AbstractPlayCommand extends AbstractNoResponsePipelineComm
             handler.setSetFirstInQueue(true);
         }
 
-        transformQuery(context.getArgs());
-
         playerManager.loadItem(String.join(" ", context.getArgs()), handler);
 
         if (!musicManager.isOpen()) {
             VoiceChannel channel = context.getEvent().getMember().getVoiceState().getChannel();
             musicManager.open(channel);
         }
-    }
-
-    protected void transformQuery(List<String> args) {
     }
 }

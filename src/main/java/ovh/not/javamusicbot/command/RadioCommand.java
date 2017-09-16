@@ -89,7 +89,7 @@ public class RadioCommand extends Command {
 
         if (Utils.warnIfBotInUse(musicManager, context)) return;
 
-        LoadResultHandler handler = new LoadResultHandler(commandManager, musicManager, playerManager, context);
+        LoadResultHandler handler = new LoadResultHandler(musicManager, playerManager, context);
 
         TrackScheduler scheduler = musicManager.getTrackScheduler();
         scheduler.getQueue().clear();

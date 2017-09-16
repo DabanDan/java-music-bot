@@ -3,8 +3,6 @@ package ovh.not.javamusicbot;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.core.entities.Member;
 import ovh.not.javamusicbot.command.*;
 
 import java.util.HashMap;
@@ -12,7 +10,6 @@ import java.util.Map;
 
 public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
-    private final Map<Member, Selection<AudioTrack, String>> selectors = new HashMap<>();
 
     CommandManager() {
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -22,7 +19,7 @@ public class CommandManager {
         CommandManager.register(commands,
                 new AboutCommand(),
                 new AdminCommand(),
-                new ChooseCommand(this),
+                new ChooseCommand(),
                 new DiscordFMCommand(this, playerManager),
                 new DumpCommand(),
                 new HelpCommand(),
@@ -52,11 +49,6 @@ public class CommandManager {
     public Map<String, Command> getCommands() {
         return commands;
     }
-
-    public Map<Member, Selection<AudioTrack, String>> getSelectors() {
-        return selectors;
-    }
-
 
     public static void register(Map<String, Command> commands, Command... cmds) {
         for (Command command : cmds) {

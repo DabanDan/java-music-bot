@@ -106,7 +106,7 @@ public class DiscordFMCommand extends AbstractNoResponsePipelineCommand {
         musicManager.getTrackScheduler().setLoop(false);
         musicManager.getPlayer().stopTrack();
 
-        LoadResultHandler handler = new LoadResultHandler(commandManager, musicManager, playerManager, context);
+        LoadResultHandler handler = new LoadResultHandler(musicManager, playerManager, context);
         handler.setVerbose(false);
 
         for (String song : songs) {

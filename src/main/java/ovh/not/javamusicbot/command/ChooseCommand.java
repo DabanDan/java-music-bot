@@ -4,21 +4,23 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.core.entities.Member;
 import ovh.not.javamusicbot.Command;
 import ovh.not.javamusicbot.CommandContext;
-import ovh.not.javamusicbot.CommandManager;
+import ovh.not.javamusicbot.GuildManager;
 import ovh.not.javamusicbot.Selection;
 
-public class ChooseCommand extends Command {
-    private final CommandManager commandManager;
+import java.util.Optional;
 
-    public ChooseCommand(CommandManager commandManager) {
+public class ChooseCommand extends Command {
+    public ChooseCommand() {
         super("choose", "pick", "select", "cancel", "c", "choos", "chose");
-        this.commandManager = commandManager;
     }
 
     @Override
     public void on(CommandContext context) {
         Member member = context.getEvent().getMember();
-        if (!commandManager.getSelectors().containsKey(member)) {
+        GuildManager guildManager = GuildManager.getInstance();
+        Optional<Selection<AudioTrack>> optionalTrackSelector = guildManager.getTrackSelector(member);
+
+        if (!optionalTrackSelector.isPresent()) {
             context.reply("There's no selection active in this guild - are you sure you ran `{{prefix}}play`?\n\n" +
                     "To play a song...\n" +
                     "* Join a voice channel\n" +
@@ -26,36 +28,45 @@ public class ChooseCommand extends Command {
                     "* Choose one of the song options with {`{prefix}}choose <song number>`");
             return;
         }
-        Selection<AudioTrack, String> selection = commandManager.getSelectors().get(member);
+
+        Selection<AudioTrack> trackSelector = optionalTrackSelector.get();
+
         if (context.getArgs().isEmpty()) {
-            commandManager.getSelectors().remove(member);
-            selection.getCallback().accept(false, null);
+            guildManager.removeTrackSelector(member);
+            trackSelector.getCallback().accept(false, null);
             return;
         }
+
         switch (context.getArgs().get(0).toLowerCase()) {
             case "c":
             case "cancel":
-                commandManager.getSelectors().remove(member);
-                selection.getCallback().accept(false, null);
+                guildManager.removeTrackSelector(member);
+                trackSelector.getCallback().accept(false, null);
                 return;
         }
+
         for (String arg : context.getArgs()) {
             int selected;
             try {
                 selected = Integer.parseInt(arg);
             } catch (NumberFormatException e) {
                 context.reply("Invalid input `%s`. Must be an integer with the range 1 - %d. **To cancel selection**, "
-                        + "use `{{prefix}}cancel`.", arg, selection.items.length);
+                        + "use `{{prefix}}cancel`.", arg, trackSelector.getItems().length);
                 return;
             }
-            if (selected < 1 || selected > selection.items.length) {
+
+            int length = trackSelector.getItems().length;
+
+            if (selected < 1 || selected > length) {
                 context.reply("Invalid input `%s`. Must be an integer with the range 1 - %d. **To cancel selection**, "
-                        + "use `{{prefix}}cancel`.", arg, selection.items.length);
+                        + "use `{{prefix}}cancel`.", arg, length);
                 return;
             }
-            AudioTrack track = selection.items[selected - 1];
-            selection.getCallback().accept(true, track);
+
+            AudioTrack track = trackSelector.getItems()[selected - 1];
+            trackSelector.getCallback().accept(true, track);
         }
-        commandManager.getSelectors().remove(member);
+
+        guildManager.removeTrackSelector(member);
     }
 }

@@ -5,8 +5,6 @@ import ovh.not.javamusicbot.CommandManager;
 import ovh.not.javamusicbot.command.base.AbstractPlayCommand;
 import ovh.not.javamusicbot.command.base.PipelineHandlers;
 
-import java.util.List;
-
 public class SoundCloudCommand extends AbstractPlayCommand {
     private static final String INVALID_ARGUMENTS_MESSAGE = "Usage: `{{prefix}}soundcloud <song title>` - searches " +
             "for a song from soundcloud\n\nIf you already have a link to a song, use `{{prefix}}play <link>`";;
@@ -17,11 +15,12 @@ public class SoundCloudCommand extends AbstractPlayCommand {
         this.allowSearch = false;
         this.isSearch = true;
 
-        getPipeline().before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1));
-    }
-
-    @Override
-    protected void transformQuery(List<String> args) {
-        args.add(0, "scsearch:");
+        // check for valid args and add scsearch to the start of the identifier
+        getPipeline()
+                .before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1))
+                .before(context -> {
+                    context.getArgs().add(0, "scsearch:");
+                    return true;
+                });
     }
 }

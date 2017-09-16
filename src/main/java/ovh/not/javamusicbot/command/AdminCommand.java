@@ -79,21 +79,28 @@ public class AdminCommand extends AbstractPipelineCommand {
     }
 
     private class EvalCommand extends AbstractTextResponseCommand {
+        private static final String INVALID_ARGUMENTS_MESSAGE = "Usage: `{{prefix}}eval <code>`\n\n" +
+                "Available variables:```\n" +
+                "event -> net.dv8tion.jda.core.events.message.MessageReceivedEvent\n" +
+                "jda   -> net.dv8tion.jda.core.JDA\n" +
+                "args  -> String[]\n" +
+                "```";
+
         private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
         private EvalCommand() {
             super("eval", "js");
 
             // require some code ;p
-            this.getPipeline().before(PipelineHandlers.argumentCheckHandler("Usage: {{prefix}}eval <code>", 1));
+            this.getPipeline().before(PipelineHandlers.argumentCheckHandler(INVALID_ARGUMENTS_MESSAGE, 1));
         }
 
         @Override
         public String textResponse(CommandContext context) {
             ScriptEngine engine = engineManager.getEngineByName("nashorn");
             engine.put("event", context.getEvent());
-            engine.put("args", context.getArgs());
             engine.put("jda", context.getEvent().getJDA());
+            engine.put("args", context.getArgs());
 
             try {
                 Object result = engine.eval(String.join(" ", context.getArgs()));
