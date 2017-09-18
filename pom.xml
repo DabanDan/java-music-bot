@@ -78,7 +78,7 @@
         <dependency>
             <groupId>com.github.Frederikam.Lavalink</groupId>
             <artifactId>Lavalink-Client</artifactId>
-            <version>fa4f9d8332</version>
+            <version>4c2f5bac97</version>
         </dependency>
 
         <dependency>

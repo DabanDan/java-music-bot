@@ -2,7 +2,6 @@ package ovh.not.javamusicbot;
 
 import com.google.gson.Gson;
 import com.moandjiezana.toml.Toml;
-import lavalink.client.io.Lavalink;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.bot.sharding.ShardManagerBuilder;
 import net.dv8tion.jda.core.entities.Game;
@@ -15,9 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
 
 public final class MusicBot {
     private static final Logger logger = LoggerFactory.getLogger(MusicBot.class);
@@ -86,7 +82,8 @@ public final class MusicBot {
             return;
         }
 
-        Lavalink lavalink = new Lavalink(config.lavalinkUserId, manager.getShardsTotal(), manager::getShard);
+        /*Lavalink lavalink = new Lavalink(config.lavalinkUserId, manager.getShardsTotal(), manager::getShard);
+
         listener.setLavalink(lavalink);
         GuildManager.getInstance().setLavalink(lavalink);
 
@@ -97,7 +94,7 @@ public final class MusicBot {
                 logger.error("error parsing lavalink node server uri", e);
                 return;
             }
-        }
+        }*/
 
         while (running) try {
             Thread.sleep(1000);
@@ -106,7 +103,7 @@ public final class MusicBot {
         }
 
         logger.info("Shutting down lavalink");
-        lavalink.shutdown();
+        //lavalink.shutdown();
     }
 
     public static ConfigLoadResult getConfigs() {

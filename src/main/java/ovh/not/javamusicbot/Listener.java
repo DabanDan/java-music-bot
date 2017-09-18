@@ -1,11 +1,15 @@
 package ovh.not.javamusicbot;
 
 import lavalink.client.io.Lavalink;
+import lavalink.client.io.VoiceServerUpdateInterceptor;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.impl.JDAImpl;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -17,6 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +45,38 @@ class Listener extends ListenerAdapter {
     private Optional<Lavalink> lavalink = Optional.empty();
 
     Listener() {
+
+    }
+
+    @Override
+    public void onReady(ReadyEvent event) {
+        Config config = MusicBot.getConfigs().config;
+        ShardManager shardManager = event.getJDA().asBot().getShardManager();
+
+        Lavalink lavalink = new Lavalink(config.lavalinkUserId, shardManager.getShardsTotal(), shardManager::getShard);
+
+        setLavalink(lavalink);
+        GuildManager.getInstance().setLavalink(lavalink);
+
+        for (Map.Entry<String, String> entry : config.lavalinkNodes.entrySet()) {
+            try {
+                lavalink.addNode(new URI(entry.getKey().substring(1, entry.getKey().length() - 1)), entry.getValue());
+            } catch (URISyntaxException e) {
+                logger.error("error parsing lavalink node server uri", e);
+                return;
+            }
+        }
+
+        try {
+            Constructor<VoiceServerUpdateInterceptor> constructor = VoiceServerUpdateInterceptor.class.getDeclaredConstructor(Lavalink.class, JDAImpl.class);
+            constructor.setAccessible(true);
+            VoiceServerUpdateInterceptor interceptor = constructor.newInstance(lavalink, event.getJDA());
+            ((JDAImpl) event.getJDA()).getClient().getHandlers().put("VOICE_SERVER_UPDATE", interceptor);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("READY! " + ((JDAImpl) event.getJDA()).getClient().getHandlers().get("VOICE_SERVER_UPDATE").getClass().getName());
     }
 
     @Override
