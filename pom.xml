@@ -40,6 +40,15 @@
             <version>1.2.63</version>
         </dependency>
 
+        <!-- redis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- config -->
         <dependency>
             <groupId>com.moandjiezana.toml</groupId>

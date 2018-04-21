@@ -6,6 +6,7 @@ import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.audio.guild.GuildAudioManager;
 import ovh.not.javamusicbot.listener.*;
+import ovh.not.javamusicbot.utils.Orchestrator;
 import ovh.not.javamusicbot.utils.PermissionReader;
 
 import javax.security.auth.login.LoginException;
@@ -55,6 +57,7 @@ public final class MusicBot {
     private GuildAudioManager guildsManager;
     private CommandManager commandManager;
     private ShardManager shardManager;
+    private Orchestrator orchestrator;
 
     public static void main(String[] args) {
         MusicBot bot = new MusicBot();
@@ -92,7 +95,19 @@ public final class MusicBot {
             }
         }
 
-        // todo set reconnect ipc queue
+        if (config.redis != null) {
+            logger.info("this bot configured to use orchestrator");
+            bot.orchestrator = new Orchestrator(config.redis);
+
+            builder.setSessionController(new SessionControllerAdapter() {
+                @Override
+                public void appendSession(SessionConnectNode node) {
+                    bot.orchestrator.requestShardAndWait(node.getShardInfo());
+                    super.appendSession(node);
+                }
+            });
+        }
+
 
         try {
             bot.shardManager = builder.build();
@@ -129,6 +144,10 @@ public final class MusicBot {
 
     public CommandManager getCommandManager() {
         return commandManager;
+    }
+
+    public Orchestrator getOrchestrator() {
+        return orchestrator;
     }
 
     public class ConfigLoadResult {

@@ -23,4 +23,5 @@ public class Config {
     public String owoKey = null;
     public String statusWebhook = null;
     public String statusToken = null;
+    public String redis = null;
 }

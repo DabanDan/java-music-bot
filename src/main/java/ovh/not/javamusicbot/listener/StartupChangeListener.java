@@ -45,6 +45,9 @@ public class StartupChangeListener extends ListenerAdapter {
         LOGGER.info("Status changed from {} to {}", oldStatus.name(), status.name());
 
         Config config = bot.getConfigs().config;
+        if (config.redis != null && status == JDA.Status.CONNECTED) {
+            bot.getOrchestrator().announceStarted(event.getEntity().getShardInfo());
+        }
         if (config.statusWebhook != null && config.statusWebhook.length() > 0) {
             JDA jda = event.getJDA();
             if (jda.getSelfUser() == null) {
