@@ -57,6 +57,8 @@ public class Orchestrator {
             e.printStackTrace();
         }
         logger.info("clear for shard {}", id);
+
+        shardMap.remove(id);
     }
 
     public void announceStarted(JDA.ShardInfo shardInfo) {
