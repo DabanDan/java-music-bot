@@ -98,6 +98,7 @@ public final class MusicBot {
         if (config.redis != null) {
             logger.info("this bot configured to use orchestrator");
             bot.orchestrator = new Orchestrator(config.redis);
+            bot.orchestrator.run();
 
             builder.setSessionController(new SessionControllerAdapter() {
                 @Override

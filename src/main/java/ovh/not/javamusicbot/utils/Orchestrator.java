@@ -6,20 +6,21 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 
-public class Orchestrator {
+public class Orchestrator extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(Orchestrator.class);
-    private ConcurrentMap<Integer, CountDownLatch> shardMap;
+    private ConcurrentMap<Integer, CountDownLatch> shardMap = new ConcurrentHashMap<>();
     private Jedis jedis;
 
     public Orchestrator(String host) {
         jedis = new Jedis(host);
-        new Thread(this::run).run();
     }
 
-    void run() {
+    @Override
+    public void run() {
         jedis.subscribe(new JedisPubSub() {
             @Override
             public void onSubscribe(String channel, int subscribedChannels) {
