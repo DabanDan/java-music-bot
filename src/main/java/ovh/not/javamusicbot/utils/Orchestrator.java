@@ -4,43 +4,38 @@ import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 
 public class Orchestrator extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(Orchestrator.class);
-    private ConcurrentMap<Integer, CountDownLatch> shardMap = new ConcurrentHashMap<>();
-    private Jedis jedis;
+    private Map<Integer, CountDownLatch> shardMap = new ConcurrentHashMap<>();
+    private final JedisPool jedisPool;
+    private final Jedis subscriber;
 
     public Orchestrator(String host) {
-        jedis = new Jedis(host);
+        super("orchestrator");
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        jedisPool = new JedisPool(poolConfig, host);
+        subscriber = jedisPool.getResource();
     }
 
     @Override
     public void run() {
-        jedis.subscribe(new JedisPubSub() {
-            @Override
-            public void onSubscribe(String channel, int subscribedChannels) {
-                logger.info("subscribe: {}", channel);
-            }
+        logger.debug("jedis subscribing");
+        subscriber.subscribe(new Subscriber(), "shards:cluster");
+    }
 
-            @Override
-            public void onMessage(String channel, String message) {
-                if (channel != "shards:cluster") return;
-                if (message.startsWith("start:")) {
-                    Integer shard = Integer.parseInt(message.substring(6));
-                    CountDownLatch latch = shardMap.getOrDefault(shard, null);
-                    if (latch != null) {
-                        latch.countDown();
-                    }
-                } else {
-                    logger.warn("master sent unknown payload: {}", message);
-                }
-            }
-        }, "shards:cluster");
+    public void close() {
+        logger.debug("closing jedis subscriber");
+        subscriber.close();
+        logger.debug("cleaning jedis pool");
+        jedisPool.close();
     }
 
     public void requestShardAndWait(JDA.ShardInfo shardInfo) {
@@ -51,7 +46,12 @@ public class Orchestrator extends Thread {
 
         logger.info("entering shard {}", id);
         String message = String.format("shards:%d", id);
-        jedis.publish("shards:master", message);
+
+        // try with resources automatically returns the resource
+        try (Jedis publisher = jedisPool.getResource()) {
+            publisher.publish("shards:master", message);
+        }
+
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -64,6 +64,30 @@ public class Orchestrator extends Thread {
 
     public void announceStarted(JDA.ShardInfo shardInfo) {
         String message = String.format("started:%d", shardInfo.getShardId());
-        jedis.publish("shards:master", message);
+
+        try (Jedis publisher = jedisPool.getResource()) {
+            publisher.publish("shards:master", message);
+        }
+    }
+
+    private class Subscriber extends JedisPubSub {
+        @Override
+        public void onSubscribe(String channel, int subscribedChannels) {
+            logger.info("subscribe: {}", channel);
+        }
+
+        @Override
+        public void onMessage(String channel, String message) {
+            if (!channel.equals("shards:cluster")) return;
+            if (message.startsWith("start:")) {
+                Integer shard = Integer.parseInt(message.substring(6));
+                CountDownLatch latch = shardMap.getOrDefault(shard, null);
+                if (latch != null) {
+                    latch.countDown();
+                }
+            } else {
+                logger.warn("master sent unknown payload: {}", message);
+            }
+        }
     }
 }

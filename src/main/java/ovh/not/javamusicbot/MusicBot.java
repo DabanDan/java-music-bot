@@ -5,6 +5,7 @@ import com.moandjiezana.toml.Toml;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.events.ShutdownEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.MediaType;
@@ -66,7 +67,7 @@ public final class MusicBot {
         bot.guildsManager = new GuildAudioManager(bot);
         bot.commandManager = new CommandManager(bot);
 
-        ListenerAdapter[] eventListeners = new ListenerAdapter[] {
+        Object[] eventListeners = new ListenerAdapter[] {
                 new GuildJoinListener(bot),
                 new GuildLeaveListener(bot.guildsManager),
                 new GuildVoiceMoveListener(bot.guildsManager),
@@ -98,13 +99,21 @@ public final class MusicBot {
         if (config.redis != null) {
             logger.info("this bot configured to use orchestrator");
             bot.orchestrator = new Orchestrator(config.redis);
-            bot.orchestrator.run();
+            bot.orchestrator.start();
 
             builder.setSessionController(new SessionControllerAdapter() {
                 @Override
                 public void appendSession(SessionConnectNode node) {
                     bot.orchestrator.requestShardAndWait(node.getShardInfo());
                     super.appendSession(node);
+                }
+            });
+
+            builder.addEventListeners(new ListenerAdapter() {
+                @Override
+                public void onShutdown(ShutdownEvent event) {
+                    logger.debug("shutting down orchestrator");
+                    bot.orchestrator.close();
                 }
             });
         }
