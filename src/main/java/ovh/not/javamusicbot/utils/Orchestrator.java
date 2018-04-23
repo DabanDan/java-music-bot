@@ -80,7 +80,8 @@ public class Orchestrator extends Thread {
         public void onMessage(String channel, String message) {
             if (!channel.equals("shards:cluster")) return;
             if (message.startsWith("start:")) {
-                Integer shard = Integer.parseInt(message.substring(6));
+                int shard = Integer.parseInt(message.substring(6));
+                logger.debug("received start for shard {}", shard);
                 CountDownLatch latch = shardMap.getOrDefault(shard, null);
                 if (latch != null) {
                     latch.countDown();

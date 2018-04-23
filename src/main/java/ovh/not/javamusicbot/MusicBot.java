@@ -5,7 +5,6 @@ import com.moandjiezana.toml.Toml;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.events.ShutdownEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.utils.SessionControllerAdapter;
 import okhttp3.MediaType;
@@ -109,13 +108,10 @@ public final class MusicBot {
                 }
             });
 
-            builder.addEventListeners(new ListenerAdapter() {
-                @Override
-                public void onShutdown(ShutdownEvent event) {
-                    logger.debug("shutting down orchestrator");
-                    bot.orchestrator.close();
-                }
-            });
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.debug("shutting down orchestrator");
+                bot.orchestrator.close();
+            }));
         }
 
 
