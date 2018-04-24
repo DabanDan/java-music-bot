@@ -19,6 +19,7 @@ import ovh.not.javamusicbot.utils.PermissionReader;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 public final class MusicBot {
@@ -97,21 +98,26 @@ public final class MusicBot {
 
         if (config.redis != null) {
             logger.info("this bot configured to use orchestrator");
-            bot.orchestrator = new Orchestrator(config.redis);
-            bot.orchestrator.start();
+            try {
+                bot.orchestrator = new Orchestrator(config.redis);
+                bot.orchestrator.start();
 
-            builder.setSessionController(new SessionControllerAdapter() {
-                @Override
-                public void appendSession(SessionConnectNode node) {
-                    bot.orchestrator.requestShardAndWait(node.getShardInfo());
-                    super.appendSession(node);
-                }
-            });
+                builder.setSessionController(new SessionControllerAdapter() {
+                    @Override
+                    public void appendSession(SessionConnectNode node) {
+                        bot.orchestrator.requestShardAndWait(node.getShardInfo());
+                        super.appendSession(node);
+                    }
+                });
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                logger.debug("shutting down orchestrator");
-                bot.orchestrator.close();
-            }));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    logger.debug("shutting down orchestrator");
+                    bot.orchestrator.close();
+                }));
+            } catch (URISyntaxException e) {
+                logger.error("invalid redis uri");
+                e.printStackTrace();
+            }
         }
 
 
