@@ -8,6 +8,8 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -18,10 +20,9 @@ public class Orchestrator extends Thread {
     private final JedisPool jedisPool;
     private final Jedis subscriber;
 
-    public Orchestrator(String host) {
+    public Orchestrator(String host) throws URISyntaxException {
         super("orchestrator");
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        jedisPool = new JedisPool(poolConfig, host);
+        jedisPool = new JedisPool(new URI("redis://" + host + ":6379"));
         subscriber = jedisPool.getResource();
     }
 
