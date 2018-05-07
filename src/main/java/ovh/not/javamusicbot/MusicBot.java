@@ -2,6 +2,7 @@ package ovh.not.javamusicbot;
 
 import com.google.gson.Gson;
 import com.moandjiezana.toml.Toml;
+import com.zaxxer.hikari.HikariConfig;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.entities.Game;
@@ -12,11 +13,14 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ovh.not.javamusicbot.audio.guild.GuildAudioManager;
+import ovh.not.javamusicbot.database.Database;
 import ovh.not.javamusicbot.listener.*;
 import ovh.not.javamusicbot.utils.PermissionReader;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class MusicBot {
@@ -24,6 +28,7 @@ public final class MusicBot {
 
     public static final String CONFIG_PATH = "config.toml";
     public static final String CONSTANTS_PATH = "constants.toml";
+    public static final String SQL_DIRECTORY_PATH = "sql";
     public static final String USER_AGENT = "JavaMusicBot v1.0-BETA (https://github.com/ducc/JavaMusicBot)";
     public static final Gson GSON = new Gson();
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
@@ -51,6 +56,7 @@ public final class MusicBot {
 
     private volatile ConfigLoadResult configs = null;
 
+    private Optional<Database> database = Optional.empty();
     private PermissionReader permissionReader;
     private GuildAudioManager guildsManager;
     private CommandManager commandManager;
@@ -59,6 +65,20 @@ public final class MusicBot {
     public static void main(String[] args) {
         MusicBot bot = new MusicBot();
         Config config = bot.getConfigs().config;
+
+        if (config.patreon) {
+            try {
+                HikariConfig hikariConfig = new HikariConfig();
+                hikariConfig.setJdbcUrl(config.databaseJdbcUrl);
+                hikariConfig.setUsername(config.databaseUsername);
+                hikariConfig.setPassword(config.databasePassword);
+                bot.database = Optional.of(new Database(SQL_DIRECTORY_PATH, hikariConfig));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
         bot.permissionReader = new PermissionReader(bot);
         bot.guildsManager = new GuildAudioManager(bot);
         bot.commandManager = new CommandManager(bot);
@@ -117,6 +137,10 @@ public final class MusicBot {
             configs = null;
             return getConfigs();
         }
+    }
+
+    public Optional<Database> getDatabase() {
+        return database;
     }
 
     public PermissionReader getPermissionReader() {

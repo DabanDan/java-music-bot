@@ -16,7 +16,7 @@ public class VolumeCommand extends Command {
     public void on(Context context) {
         if (!this.bot.getConfigs().config.patreon) {
             context.reply("**The volume command is dabBot premium only!**" +
-                    "\nDonate for the `Super supporter` tier on Patreon at https://patreon.com/dabbot to gain access.");
+                    "\nDonate for the `Volume Control` tier on Patreon at https://patreon.com/dabbot to gain access.");
             return;
         }
 

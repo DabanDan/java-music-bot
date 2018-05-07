@@ -9,7 +9,7 @@ public class Config {
     public Set<String> owners = null;
     public Set<String> managers = null;
     public String regex = null;
-    String prefix = null;
+    public String prefix = null;
     String game = null;
     public String invite = null;
     public String about = null;
@@ -24,4 +24,7 @@ public class Config {
     public String glanceWebhook = null;
     public String statusWebhook = null;
     public String statusToken = null;
+    String databaseJdbcUrl = null;
+    String databaseUsername = null;
+    String databasePassword = null;
 }

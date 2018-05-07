@@ -52,6 +52,7 @@ public class CommandManager {
                 new NowPlayingCommand(bot),
                 new PauseCommand(bot),
                 new PlayCommand(bot, this, playerManager),
+                new PrefixCommand(bot),
                 new ProvidersCommand(bot, playerManager),
                 new QueueCommand(bot),
                 new RadioCommand(bot, this, playerManager),
