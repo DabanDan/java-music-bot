@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.6.0_356</version>
+            <version>3.6.0_362</version>
         </dependency>
         <!--<dependency>
             <groupId>com.github.DV8FromTheWorld</groupId>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
-            <version>0.7.1</version>
+            <version>0.7.2</version>
         </dependency>
 
         <!-- logging -->
