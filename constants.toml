@@ -1057,6 +1057,7 @@
   "Viking FM"                        = "http://icy-e-bz-05-cr.sharp-stream.com/viking.mp3"
   "Vinyl FM"                         = "http://ads-e-bauerse-fm-06-gos2.sharp-stream.com/vinylfm_instream_se_mp3"
   "Virgin Radio Romania"             = "http://astreaming.virginradio.ro:8000/virgin_mp3_64k"
+  "Virgin Radio Turkey"              = "http://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO.mp3"
   "Virgin Radio"                     = "http://vr-live-mp3-128.scdn.arkena.com/virginradio.mp3"
   "Vocaloid Radio"                   = "http://curiosity.shoutca.st:8019/stream"
   "Voices of Asgardia"               = "http://142.4.217.133:9375/stream?hash=1497461473912.mp3"
