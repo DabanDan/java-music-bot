@@ -652,6 +652,7 @@
   "Radio FFH"                        = "http://streams.ffh.de/radioffh/mp3/hqlivestream.m3u"
   "Radio FG"                         = "http://radiofg.impek.com/fg"
   "Radio Flaixbac"                   = "http://radiostream.radioflaixbac.cat:8004/listen.pls"
+  "Radio FM4"                        = "http://185.85.29.141:8000/listen.pls"
   "Radio Freee"                      = "http://radiofreee.pl/streaming/radiofreee.m3u"
   "Radio Fritz"                      = "http://rbb-fritz-live.cast.addradio.de/rbb/fritz/live/mp3/128/stream.mp3"
   "Radio Globo Italia"               = "http://178.33.72.12/globorm128?type=.mp3/;stream.mp3"
